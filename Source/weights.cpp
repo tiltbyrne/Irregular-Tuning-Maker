@@ -37,15 +37,15 @@ std::array<std::pair<QString, SizeToWeightFunction>,
         {
             settings::customWeightFuncName[0],
             [](const long double& size)
-            {
-              const auto approx{ approximate(size) };
+          {
+              const auto [numerator, denominator] = approximateFraction(size);
 
-              constexpr auto k{ 1.0L };
+              if (numerator == 0 || denominator == 0)
+                  return 0.0L;
 
-              const auto w{ std::exp(-std::abs(std::log2(size)) * k) };
-
-              return std::clamp(w, 0.0L, 1.0L);
-            }
+              return 1.0L / (static_cast<long double>(std::abs(numerator)) *
+                             static_cast<long double>(denominator));
+          }
         },
         {
             settings::customWeightFuncName[1],

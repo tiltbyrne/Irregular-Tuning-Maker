@@ -5,29 +5,61 @@
 #include <cmath>
 #include "settings.h"
 
-struct RationalApprox
+static std::pair<long long, long long> approximateFraction(long double value,
+                                                           long double epsilon = settings::epsilon,
+                                                           long long maxDenominator = 1000000,
+                                                           int maxIterations = 64)
 {
-    long double value;
-    long double error;
-};
+    if (!std::isfinite(value))
+        return {0, 1};
 
-static RationalApprox approximate(long double x)
-{
-    // clamp extreme values early
-    if (!std::isfinite(x) || x <= 0)
-        return {1.0L, 0.0L};
+    if (value == 0.0L)
+        return {0, 1};
 
-    // normalize to log space (this is key)
-    const auto logx{ std::log2(x) };
+    const bool negative = value < 0;
+    value = std::abs(value);
 
-    // map to nearest rational grid (bounded resolution)
-    //const auto snapped{ std::round(logx * 24.0L) / 24.0L };
+    long long h0 = 0, h1 = 1;
+    long long k0 = 1, k1 = 0;
 
-    const auto approx{ std::exp2(logx) };
+    long double x = value;
 
-    const auto error{ std::abs(x - approx) };
+    for (int i = 0; i < maxIterations; ++i)
+    {
+        const auto a = static_cast<long long>(std::floor(x));
 
-    return {approx, error};
+        // Overflow guard
+        if (a != 0 &&
+            (h1 > (std::numeric_limits<long long>::max() - h0) / a ||
+             k1 > (std::numeric_limits<long long>::max() - k0) / a))
+            break;
+
+        const long long h = a * h1 + h0;
+        const long long k = a * k1 + k0;
+
+        if (k > maxDenominator)
+            break;
+
+        const long double approximation =
+            static_cast<long double>(h) / k;
+
+        if (std::abs(approximation - value) <= epsilon)
+            return {negative ? -h : h, k};
+
+        const long double frac = x - a;
+
+        if (frac <= std::numeric_limits<long double>::epsilon())
+            return {negative ? -h : h, k};
+
+        h0 = h1;
+        h1 = h;
+        k0 = k1;
+        k1 = k;
+
+        x = 1.0L / frac;
+    }
+
+    return {negative ? -h1 : h1, k1};
 }
 
 /*
