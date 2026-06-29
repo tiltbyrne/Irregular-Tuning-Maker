@@ -14,6 +14,7 @@
 #include "dbcurrnet.h"
 #include "settings.h"
 #include "interval.h"
+#include "scalespacemodel.h"
 
 using IntervalsPattern = std::vector<std::vector<Interval>>;
 using SizeToWeightFunction = std::function<long double(const long double&)>;
@@ -48,8 +49,8 @@ protected slots:
 
 private slots:
     void handleScaleSpaceActivated(QString scaleSpaceName);
-    void handleSizeModelItemChanged(QStandardItem* item);
-    void handleWeightModelItemChanged(QStandardItem* item);
+    //void handleSizeModelItemChanged(QStandardItem* item);
+    //void handleWeightModelItemChanged(QStandardItem* item);
     void handleHeaderLeftClicked(int logicalIndex);
     void handleSaveSubScaleSpace();
     void handleSaveSubScaleSpaceAs();
@@ -57,7 +58,7 @@ private slots:
     void handleCancelClicked();
     void makingTuningFinished();
 
-    void handleRangeChanged(int range);
+    void handleRangeChanged(const int& range);
 
 private:
     Ui::MainWindow *ui;
@@ -68,30 +69,17 @@ private:
     std::vector<long double> currentTuning;
 
     ScaleSpace scaleSpace;
-    QStandardItemModel* sizeModel;
-    QStandardItemModel* weightModel;
+    //QStandardItemModel* sizeModel;
+    //QStandardItemModel* weightModel;
+    ScaleSpaceModel* model;
+    bool selectionIsSymetric{ false };
+    std::vector<int> selectedNotes;
 
     QButtonGroup* displayModeGroup;
     QButtonGroup* sizeWeightModeGroup;
 
     int idxOfPrevWeightFunc{ 0 };
-    std::vector<std::vector<long double>> cashedPreCustomWeightTable;
-
-    enum class DisplayMode
-    {
-        ratio = 0,
-        cents = 1
-    };
-
-    DisplayMode displayMode{ DisplayMode::ratio };
-
-    enum class IntervalMode
-    {
-        size = 0,
-        weight = 1
-    };
-
-    IntervalMode intervalMode{ IntervalMode::size };
+    //std::vector<std::vector<long double>> cachedPreCustomWeightTable;
 
     bool shouldNotProcessSizeChange{ false };
     bool shouldNotProcessWeightChange{ false };
@@ -107,11 +95,10 @@ private:
     void refreshModels();
     void refreshWeightModel();
     void handleClearSelection();
-    void setIntervalMode(const IntervalMode& mode);
     void setSelectionModelBehaviour();
 
     void initialiseTable();
-    void populateModels();
+    //void populateModels();
     void initialiseWeightFunctionsCombo();
     void initialiseScaleSpacesCombo();
     void initialiseCutoffDial();
@@ -123,32 +110,25 @@ private:
 
     void initialiseDisplaySettings();
     void initialiseSizeWeightRatioGroup();
-    void initialiseSettings();
+    void initialiseWindow();
 
-    //returns the notes which are selected at (row, column) AND (column, row)
-    std::vector<int> getSelectedNotes() const;
     long double intervalSizeAsRatio(const long double& size) const;
-
-    long double makeSizeItemValue(const int& noteTo, const int& noteFrom) const;
-    QString makeSizeItemText(const int& noteTo, const int& noteFrom) const;
-
-    long double makeWeightItemValue(const int& noteTo, const int& noteFrom, const int& functionIndex) const;
-    QString makeWeightItemText(const int& noteTo, const int& noteFrom, const int& functionIndex) const;
 
     const long double getCutoffValue();
 
-    void weightFunctionChanged(const int& newFunctionIndex);
+    //void weightFunctionChanged(const int& newFunctionIndex);
 
-    bool selectionIsSymetric() const;
+    //bool selectionIsSymetric() const;
 
     IntervalsPattern makeSubIntervalsPattern(std::vector<int> notes) const;
 
     void displayTuning();
 
     QString makeTooltipText(const QModelIndex& index);
+
+    void updateSaveButtonStates();
 };
 
-extern inline bool itemShouldBeAltColour(const int& noteFrom, const int& noteTo, const int& scaleSize);
 extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSize, const int& newScaleSpaceSize);
 extern bool inputIsValid(const QString& input);
 
