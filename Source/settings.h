@@ -38,6 +38,8 @@ constexpr int darknessFactor{ 100 };
 constexpr int precisionMax{ globals::longDoubleLimit < 15 ? globals::longDoubleLimit
                                                           : 15 };
 
+const long double epsilon{ std::pow(10.L, - static_cast<long double>(precisionMax)) };
+
 constexpr long double attenuationScaling{ 5 };
 
 constexpr long double cutoffValueExponentNumerator{ 1000 };

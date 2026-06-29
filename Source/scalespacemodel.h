@@ -61,6 +61,8 @@ public:
 
     IntervalMode getIntervalMode() const;
 
+    void recomputeCache();
+
 private:
     int range{ 0 };
 
@@ -134,7 +136,7 @@ private:
 
     long double calculateIntervalWeight(const long double& intervalSize) const;
 
-    long double makeEditValue(const QModelIndex &index, const QVariant &value, const int& role, bool& isValid) const;
+    long double makeDataValue(const QModelIndex &index, const QVariant &value, const int& role, bool& isValid) const;
 
     long double forceEditValueRatio(const long double& size) const;
 

@@ -45,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent)
     initialiseCutoffDial();
     initialiseAttenuationSlider();
     initialiseSaveSubScaleButtons();
+    initialiseSelectionBox();
     initialiseTable();
 }
 
@@ -64,7 +65,9 @@ void MainWindow::handleScaleSpaceActivated(QString selection)
         return;
 
     selectedNotes.clear();
-    selectionIsSymetric = false;
+
+    ui->scaleSpaceTable->selectionModel()->clearSelection();
+    ui->selectionBox->clear();
 
     if (selection == settings::customScaleSpaceName) //opening a custom scale space
     {
@@ -287,7 +290,12 @@ void MainWindow::initialiseTable()
             horizontalHeader,
             &CustomHeaderView::handleScaleSpaceSizeChanged);
 
-    connect(&(this->scaleSpace),
+    connect(&scaleSpace,
+            &ScaleSpace::sizeChanged,
+            horizontalHeader,
+            &CustomHeaderView::handleScaleSpaceSizeChanged);
+
+    connect(&scaleSpace,
             &ScaleSpace::spaceTooSmall,
             horizontalHeader,
             [horizontalHeader](auto isTooSmall)
@@ -346,7 +354,6 @@ void MainWindow::initialiseTable()
             [this]()
             {
                 selectedNotes.clear();
-                selectionIsSymetric = false;
                 updateSaveButtonStates();
             });
 }
@@ -429,6 +436,63 @@ void MainWindow::handleHeaderLeftClicked(int logicalIndex)
             }
         }};
 
+    auto selectionFlag{ std::find(selectedNotes.begin(), selectedNotes.end(), logicalIndex) != selectedNotes.end()
+                           ? QItemSelectionModel::Deselect
+                           : QItemSelectionModel::Select };
+
+    const auto notesCount{ model->getRange() };
+
+    auto notesToIterateOver{ selectedNotes };
+
+    QItemSelection selections;
+
+    if (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)
+    {
+        const auto baseIndex{ scaleSpace.getBaseNote(logicalIndex) };
+
+        const auto scaleSpaceSize{ scaleSpace.storedSize() };
+
+        auto repeatedSelection{ baseIndex };
+
+        while (repeatedSelection < notesCount)
+        {
+            notesToIterateOver.push_back(repeatedSelection);
+            repeatedSelection += scaleSpaceSize;
+        }
+
+        auto repeatingIndex{ baseIndex };
+
+        while (repeatingIndex < notesCount)
+        {
+
+            informSelectedNotes(repeatingIndex, selectionFlag);
+
+            repeatingIndex += scaleSpaceSize;
+        }
+    }
+    else
+    {
+        notesToIterateOver.push_back(logicalIndex);
+
+        informSelectedNotes(logicalIndex, selectionFlag);
+    }
+
+    std::sort(selectedNotes.begin(), selectedNotes.end());
+
+    ui->selectionBox->clear();
+
+    if (!selectedNotes.empty())
+    {
+        QStringList list;
+
+        for (const auto& note : selectedNotes)
+            list << QString::number(note + 1);
+
+        QString output{ "Selection: " };
+        output.append(list.join(", "));
+
+        ui->selectionBox->appendPlainText(output);
+    }
 
     /*
 
@@ -582,12 +646,7 @@ void MainWindow::initialiseMakeCancelButtons()
     connect(ui->clearButton,
             &QPushButton::clicked,
             this,
-            [this]()
-            {
-                currentTuning.clear();
-                ui->temperamentBox->clear();
-                ui->makeProgressBar->setValue(0);
-            });
+            &MainWindow::handleClearClicked);
 
     connect(&watcher,
             &QFutureWatcher<std::vector<long double>>::finished,
@@ -597,10 +656,16 @@ void MainWindow::initialiseMakeCancelButtons()
 
 void MainWindow::handleSaveSubScaleSpaceAs()
 {
+    if (!ui->saveAsButton->isEnabled())
+        return;
+
     const auto url{ QFileDialog::getSaveFileUrl(this,
                                                 "Save File",
                                                 QDir::currentPath(),
                                                 "Scale Spaces (*." + dbUtils::filetypeName + ")") };
+
+    if (!url.isValid() || url.isEmpty())
+        return;
 
     if (dbManager::createDatabase(url))
     {
@@ -617,7 +682,7 @@ void MainWindow::handleSaveSubScaleSpaceAs()
                 notesToSave.push_back(note);
         }
 
-        dbManager::openDatabase(url)->savePattern(
+        newDatabase->savePattern(
             scaleSpace.makeSubSizePattern(notesToSave));
 
         QFileInfo info{ url.toLocalFile() };
@@ -636,7 +701,7 @@ void MainWindow::handleSaveSubScaleSpaceAs()
 
 void MainWindow::handleMakeClicked()
 {
-    if (future.isRunning())
+    if (future.isRunning() || !ui->makeButton->isEnabled())
         return;
 
     ui->makeButton->setDisabled(true);
@@ -679,6 +744,9 @@ void MainWindow::handleMakeClicked()
 
 void MainWindow::handleCancelClicked()
 {
+    if (!ui->cancelButton->isEnabled())
+        return;
+
     tuneScaleCancelRequested = true;
 
     ui->makeButton->setEnabled(true);
@@ -708,7 +776,7 @@ void MainWindow::makingTuningFinished()
 
 void MainWindow::handleSaveSubScaleSpace()
 {
-    if (!currentFileUrl.isValid())
+    if (!currentFileUrl.isValid() || !ui->saveButton->isEnabled())
     {
         handleSaveSubScaleSpaceAs();
         return;
@@ -833,17 +901,27 @@ void MainWindow::updateSaveButtonStates()
     ui->saveButton->setEnabled(info.absoluteDir().canonicalPath() != dbUtils::databaseDirectory);
 }
 
+void MainWindow::handleClearClicked()
+{
+    if (future.isRunning() || !ui->clearButton->isEnabled())
+        return;
+
+    currentTuning.clear();
+    ui->temperamentBox->clear();
+    ui->makeProgressBar->setValue(0);
+}
+
 void MainWindow::handleAddNote(int noteToAdd)
 {
     const auto initialSize{ scaleSpace.storedSize() };
 
     scaleSpace.addNote(noteToAdd);
 
-    QSignalBlocker blocker(ui->rangeSpinBox);
-
     ui->rangeSpinBox->setValue(makeAdjustedRange(ui->rangeSpinBox->value(),
                                                  initialSize,
                                                  initialSize + 1));
+
+    model->recomputeCache();
 
     //populateModels();
 }
@@ -854,12 +932,13 @@ void MainWindow::handleDeleteNote(int noteToDelete)
 
     scaleSpace.removeNote(noteToDelete);
 
-    QSignalBlocker blocker(ui->rangeSpinBox);
+    //QSignalBlocker blocker(ui->rangeSpinBox);
 
     ui->rangeSpinBox->setValue(makeAdjustedRange(ui->rangeSpinBox->value(),
                                                  initialSize,
                                                  initialSize - 1));
 
+    model->recomputeCache();
     //populateModels();
 }
 
@@ -902,7 +981,10 @@ void MainWindow::handleRangeChanged(const int& range)
 void MainWindow::handleClearSelection()
 {
     ui->scaleSpaceTable->selectionModel()->clearSelection();
+
     selectedNotes = {};
+
+    ui->selectionBox->clear();
 }
 
 void MainWindow::initialiseDisplaySettings()
@@ -1029,6 +1111,15 @@ void MainWindow::initialisePrecisionSpinBox()
             });
 }
 
+void MainWindow::initialiseSelectionBox()
+{
+    const auto& selectionBox{ ui->selectionBox };
+    selectionBox->setFixedHeight(selectionBox->fontMetrics().height() +
+                                 2 * selectionBox->contentsMargins().top() + 8);
+
+    selectionBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+}
+
 void MainWindow::handleCurrentUrlChanged(QUrl newUrl)
 {
     QFileInfo info{ newUrl.toLocalFile() };
@@ -1044,7 +1135,37 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
         if (keyEvent->key() == Qt::Key_Tab)
         {
-            swapModel();
+            swapIntervalMode();
+            return true;
+        }
+        if (keyEvent->key() == QKeySequence::NextChild)
+        {
+            swapIntervalMode();
+            return true;
+        }
+        if (keyEvent->matches(QKeySequence::Save))
+        {
+            handleSaveSubScaleSpace();
+            return true;
+        }
+        if (keyEvent->matches(QKeySequence::SaveAs))
+        {
+            handleSaveSubScaleSpaceAs();
+            return true;
+        }
+        if (keyEvent->matches(QKeySequence::InsertParagraphSeparator))
+        {
+            handleMakeClicked();
+            return true;
+        }
+        if (keyEvent->matches(QKeySequence::Cancel))
+        {
+            handleCancelClicked();
+            return true;
+        }
+        if (keyEvent->matches(QKeySequence::DeleteStartOfWord))
+        {
+            handleClearClicked();
             return true;
         }
 
@@ -1068,28 +1189,17 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
                 return true;
             }
-            if (keyEvent->matches(QKeySequence::SelectAll))
-            {
-                ui->scaleSpaceTable->setSelectionMode(QAbstractItemView::MultiSelection);
-                ui->scaleSpaceTable->selectAll();
-                ui->scaleSpaceTable->setSelectionMode(QAbstractItemView::SingleSelection);
-                return true;
-            }
         }
     }
     if (event->type() == QEvent::ToolTip && obj == ui->scaleSpaceTable->viewport())
     {
-
         const auto* helpEvent{ static_cast<QHelpEvent*>(event) };
 
         const auto index{ ui->scaleSpaceTable->indexAt(helpEvent->pos()) };
 
         if (index.isValid())
         {
-            QToolTip::showText(
-                helpEvent->globalPos(),
-                makeTooltipText(index),
-                ui->scaleSpaceTable);
+            QToolTip::showText(helpEvent->globalPos(), makeTooltipText(index), ui->scaleSpaceTable);
 
             return true;
         }
@@ -1112,11 +1222,11 @@ void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCur
 
     scaleSpace.setScaleSpace(newName, newDatabase->loadPattern());
 
-    QSignalBlocker blocker(ui->rangeSpinBox);
+    //QSignalBlocker blocker(ui->rangeSpinBox);
 
     ui->rangeSpinBox->setValue(makeAdjustedRange(model->getRange(), oldSize, scaleSpace.storedSize()));
 
-    model->setScaleSpace(&scaleSpace);
+    model->recomputeCache();
 
     setWindowTitle(newName + " - " + globals::appName);
 }
@@ -1153,10 +1263,14 @@ extern bool inputIsValid(const QString& input)
 }
 */
 
-void MainWindow::swapModel()
+void MainWindow::swapIntervalMode()
 {
-    model->setIntervalMode(model->getIntervalMode() == IntervalMode::size ? IntervalMode::weight
-                                                                          : IntervalMode::size);
+    const auto newIntervalMode{ model->getIntervalMode() == IntervalMode::size ? IntervalMode::weight
+                                                                               : IntervalMode::size};
+
+    model->setIntervalMode(newIntervalMode);
+
+    sizeWeightModeGroup->button(static_cast<int>(newIntervalMode))->setChecked(true);
 }
 
 /*

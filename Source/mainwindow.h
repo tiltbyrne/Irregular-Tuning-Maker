@@ -72,7 +72,7 @@ private:
     //QStandardItemModel* sizeModel;
     //QStandardItemModel* weightModel;
     ScaleSpaceModel* model;
-    bool selectionIsSymetric{ false };
+    //bool selectionIsSymetric{ false };
     std::vector<int> selectedNotes;
 
     QButtonGroup* displayModeGroup;
@@ -91,7 +91,7 @@ private:
     void changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase);
 
     QStandardItemModel* currentModel() const;
-    void swapModel();
+    void swapIntervalMode();
     void refreshModels();
     void refreshWeightModel();
     void handleClearSelection();
@@ -107,6 +107,7 @@ private:
     void initialiseMakeCancelButtons();
     void initialiseRangeSpinBox();
     void initialisePrecisionSpinBox();
+    void initialiseSelectionBox();
 
     void initialiseDisplaySettings();
     void initialiseSizeWeightRatioGroup();
@@ -127,6 +128,8 @@ private:
     QString makeTooltipText(const QModelIndex& index);
 
     void updateSaveButtonStates();
+
+    void handleClearClicked();
 };
 
 extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSize, const int& newScaleSpaceSize);

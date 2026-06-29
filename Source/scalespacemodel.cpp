@@ -60,7 +60,6 @@ QVariant ScaleSpaceModel::data(const QModelIndex &index, int role) const
 
     case Qt::BackgroundRole:
 
-        qDebug() << scaleSpace->storedSize();
         const auto& palette = QApplication::palette();
 
         if (itemShouldBeAltColour(noteFrom, noteTo))
@@ -76,7 +75,7 @@ QVariant ScaleSpaceModel::data(const QModelIndex &index, int role) const
 bool ScaleSpaceModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     bool isValid{ false };
-    const auto data{ makeEditValue(index, value, role, isValid) };
+    const auto data{ makeDataValue(index, value, role, isValid) };
 
     if (!isValid)
         return false;
@@ -208,7 +207,7 @@ long double ScaleSpaceModel::calculateIntervalWeight(const long double &interval
     return 1;
 }
 
-long double ScaleSpaceModel::makeEditValue(const QModelIndex &index, const QVariant &value, const int& role, bool& isValid) const
+long double ScaleSpaceModel::makeDataValue(const QModelIndex &index, const QVariant &value, const int& role, bool& isValid) const
 {
     const auto canBeString{ value.canConvert<QString>() };
 
@@ -312,8 +311,8 @@ void ScaleSpaceModel::setSizeData(const QModelIndex &index, const long double &d
 
             while (noteTo < range)
             {
-                updateCache(row, column);
-                updateCache(column, row);
+                updateCache(noteFrom, noteTo);
+                updateCache(noteTo, noteFrom);
 
                 indecies.push_back(this->index(noteFrom, noteTo));
                 indecies.push_back(this->index(noteTo, noteFrom));
@@ -526,6 +525,15 @@ void ScaleSpaceModel::setWeightFunction(const WeightFunction &newWeightFunction)
 IntervalMode ScaleSpaceModel::getIntervalMode() const
 {
     return intervalMode;
+}
+
+void ScaleSpaceModel::recomputeCache()
+{
+    beginResetModel();
+
+    precomputeCache();
+
+    endResetModel();
 }
 
 bool ScaleSpaceModel::itemShouldBeAltColour(const int& noteFrom, const int& noteTo) const
