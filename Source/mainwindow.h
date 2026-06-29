@@ -90,8 +90,10 @@ private:
     void changeScaleSpace(const QString& newScaleSpaceName, const QString& newScaleSpaceDirectory);
     void changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase);
 
-    QStandardItemModel* currentModel() const;
+    //QStandardItemModel* currentModel() const;
     void swapIntervalMode();
+    void swapDisplayMode();
+
     void refreshModels();
     void refreshWeightModel();
     void handleClearSelection();

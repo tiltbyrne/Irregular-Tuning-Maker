@@ -61,6 +61,8 @@ public:
 
     IntervalMode getIntervalMode() const;
 
+    DisplayMode getDisplayMode() const;
+
     void recomputeCache();
 
 private:

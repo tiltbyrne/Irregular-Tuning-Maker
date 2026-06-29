@@ -17,7 +17,6 @@
 #include "dbManager.h"
 #include "utilities.h"
 #include "customheaderview.h"
-//#include "fractionParser.h"
 #include "scale.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -34,6 +33,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     QApplication::instance()->installEventFilter(this);
     initialiseWindow();
+    setWindowIcon(QIcon(":/icon.png"));
 
     initialiseDisplaySettings();
     initialiseMakeCancelButtons();
@@ -947,7 +947,7 @@ void MainWindow::initialiseRangeSpinBox()
     ui->rangeSpinBox->setRange(2, settings::maxTableSize);
     ui->rangeSpinBox->setValue(scaleSpace.size());
 
-    const auto* increaseShortcut{ new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Equal), this) };
+    const auto* increaseShortcut{ new QShortcut(QKeyCombination(Qt::ControlModifier, Qt::Key_Equal), this) };
 
     connect(increaseShortcut,
             &QShortcut::activated,
@@ -957,7 +957,7 @@ void MainWindow::initialiseRangeSpinBox()
                 ui->rangeSpinBox->setValue(ui->rangeSpinBox->value() + 1);
             });
 
-    const auto* decreaseShortcut{ new QShortcut(QKeySequence(Qt::CTRL | Qt::Key_Minus), this) };
+    const auto* decreaseShortcut{ new QShortcut(QKeyCombination(Qt::ControlModifier, Qt::Key_Minus), this) };
 
     connect(decreaseShortcut,
             &QShortcut::activated,
@@ -965,6 +965,30 @@ void MainWindow::initialiseRangeSpinBox()
             [this]()
             {
                 ui->rangeSpinBox->setValue(ui->rangeSpinBox->value() - 1);
+            });
+
+    const auto* increaseBySizeShortcut{ new QShortcut(QKeyCombination(Qt::ShiftModifier, Qt::Key_Equal), this) };
+
+    connect(increaseBySizeShortcut,
+            &QShortcut::activated,
+            this,
+            [this]()
+            {
+                qDebug() << model->getRange() << settings::maxTableSize - scaleSpace.storedSize();
+
+                if (model->getRange() <= settings::maxTableSize - scaleSpace.storedSize())
+                    ui->rangeSpinBox->setValue(ui->rangeSpinBox->value() + scaleSpace.storedSize());
+            });
+
+    const auto* decreaseBySizeShortcut{ new QShortcut(QKeyCombination(Qt::ShiftModifier, Qt::Key_Minus), this) };
+
+    connect(decreaseBySizeShortcut,
+            &QShortcut::activated,
+            this,
+            [this]()
+            {
+                if (model->getRange() > scaleSpace.size())
+                    ui->rangeSpinBox->setValue(ui->rangeSpinBox->value() - scaleSpace.storedSize());
             });
 
     connect(ui->rangeSpinBox,
@@ -1131,6 +1155,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress)
     {
+
+
         auto *keyEvent{ static_cast<QKeyEvent*>(event) };
 
         if (keyEvent->key() == Qt::Key_Tab)
@@ -1138,9 +1164,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             swapIntervalMode();
             return true;
         }
-        if (keyEvent->key() == QKeySequence::NextChild)
+        if (keyEvent->key() == Qt::Key_Space)
         {
-            swapIntervalMode();
+            swapDisplayMode();
             return true;
         }
         if (keyEvent->matches(QKeySequence::Save))
@@ -1153,7 +1179,9 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             handleSaveSubScaleSpaceAs();
             return true;
         }
-        if (keyEvent->matches(QKeySequence::InsertParagraphSeparator))
+        if ((keyEvent->key() == Qt::Key_Return ||
+             keyEvent->key() == Qt::Key_Enter) &&
+            (keyEvent->modifiers() & Qt::ControlModifier))
         {
             handleMakeClicked();
             return true;
@@ -1163,7 +1191,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             handleCancelClicked();
             return true;
         }
-        if (keyEvent->matches(QKeySequence::DeleteStartOfWord))
+        if (keyEvent->key() == Qt::Key_Delete && keyEvent->modifiers() == Qt::ControlModifier)
         {
             handleClearClicked();
             return true;
@@ -1271,6 +1299,16 @@ void MainWindow::swapIntervalMode()
     model->setIntervalMode(newIntervalMode);
 
     sizeWeightModeGroup->button(static_cast<int>(newIntervalMode))->setChecked(true);
+}
+
+void MainWindow::swapDisplayMode()
+{
+    const auto newDisplayMode{ model->getDisplayMode() == DisplayMode::ratio ? DisplayMode::cents
+                                                                              : DisplayMode::ratio};
+
+    model->setDisplayMode(newDisplayMode);
+
+    displayModeGroup->button(static_cast<int>(newDisplayMode))->setChecked(true);
 }
 
 /*

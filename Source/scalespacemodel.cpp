@@ -527,6 +527,11 @@ IntervalMode ScaleSpaceModel::getIntervalMode() const
     return intervalMode;
 }
 
+DisplayMode ScaleSpaceModel::getDisplayMode() const
+{
+    return displayMode;
+}
+
 void ScaleSpaceModel::recomputeCache()
 {
     beginResetModel();

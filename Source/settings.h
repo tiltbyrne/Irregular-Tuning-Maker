@@ -31,7 +31,7 @@ const auto attenuationMidpoint{ (static_cast<long double>(settings::attenuationR
 
 constexpr int precision{ 4 };
 
-constexpr int maxTableSize{ 512 };
+constexpr int maxTableSize{ 999 };
 
 constexpr int darknessFactor{ 100 };
 
@@ -56,8 +56,6 @@ const QStringList scaleSpaceNames{ "5edo",
                                    customScaleSpaceName };
 
 const QString scaleSpaceName{ scaleSpaceNames[3] };
-
-//QPalette warmAutumnGlow;
 
 }
 
