@@ -3,6 +3,7 @@
 
 #include <QString>
 #include <QSettings>
+#include <QPalette>
 #include "globals.h"
 
 namespace settings
@@ -19,15 +20,18 @@ const QString uniformWeightFunctionName{ "Uniform" };
 const QStringList weightFunctionNames{ "Inverse Benedetti",
                                        uniformWeightFunctionName };
 
-const QString scaleSpaceName{ "Major Scale" };
-
 const QString customWeightFuncName{ "Arbitrary" };
 
-constexpr int range{ 6 };
+const std::pair<int, int> attenuationRange{0, 100};
+
+const auto attenuationMidpoint{ (static_cast<long double>(settings::attenuationRange.second) -
+                                 static_cast<long double>(settings::attenuationRange.first)) / 2.L };
+
+//constexpr int range{ 6 };
 
 constexpr int precision{ 4 };
 
-constexpr int maxTableSize{ 256 };
+constexpr int maxTableSize{ 512 };
 
 constexpr int darknessFactor{ 100 };
 
@@ -44,9 +48,33 @@ const QStringList scaleSpaceNames{ "5edo",
                                    "7edo",
                                    "12edo",
                                    "Major Scale",
-                                   //"14edo",
+                                   "15edo",
+                                   "17edo",
+                                   "19edo",
                                    customScaleSpaceName };
 
+const QString scaleSpaceName{ scaleSpaceNames[3] };
+
+//QPalette warmAutumnGlow;
+
 }
+
+enum class DisplayMode
+{
+    ratio = 0,
+    cents = 1
+};
+
+enum class IntervalMode
+{
+    size = 0,
+    weight = 1
+};
+
+enum class WeightMode
+{
+    Deterministic = 0,
+    Arbitrary = 1
+};
 
 #endif // SETTINGS_H

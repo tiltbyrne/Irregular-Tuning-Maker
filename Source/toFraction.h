@@ -5,6 +5,32 @@
 #include <cmath>
 #include "settings.h"
 
+struct RationalApprox
+{
+    long double value;
+    long double error;
+};
+
+static RationalApprox approximate(long double x)
+{
+    // clamp extreme values early
+    if (!std::isfinite(x) || x <= 0)
+        return {1.0L, 0.0L};
+
+    // normalize to log space (this is key)
+    const auto logx{ std::log2(x) };
+
+    // map to nearest rational grid (bounded resolution)
+    //const auto snapped{ std::round(logx * 24.0L) / 24.0L };
+
+    const auto approx{ std::exp2(logx) };
+
+    const auto error{ std::abs(x - approx) };
+
+    return {approx, error};
+}
+
+/*
 static std::pair<long long, long long> toFraction(long double value,
                                                   long double epsilon = std::pow(10, -settings::precisionMax))
 {
@@ -48,5 +74,6 @@ static long double sumFractionParts(const long double& value)
 
     return numerator * denominator;
 }
+*/
 
 #endif // TOFRACTION_H

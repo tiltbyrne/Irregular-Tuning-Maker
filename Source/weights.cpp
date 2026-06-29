@@ -38,8 +38,13 @@ std::array<std::pair<QString, SizeToWeightFunction>,
             settings::customWeightFuncName[0],
             [](const long double& size)
             {
-              auto returnValue{ 1 / sumFractionParts(size) };
-              return std::clamp(returnValue, 0.L, 1.L);
+              const auto approx{ approximate(size) };
+
+              constexpr auto k{ 1.0L };
+
+              const auto w{ std::exp(-std::abs(std::log2(size)) * k) };
+
+              return std::clamp(w, 0.0L, 1.0L);
             }
         },
         {
