@@ -375,6 +375,15 @@ void MainWindow::initialiseWeightFunctionsCombo()
                 else
                     model->setWeightFunction(weightFunctions[index].second);
             });
+
+    connect(model,
+            &ScaleSpaceModel::weightModeArbitrary,
+            this,
+            [this]()
+            {
+                const auto blocker{ QSignalBlocker(ui->weightFuncCombo) };
+                ui->weightFuncCombo->setCurrentText(settings::customWeightFuncName);
+            });
 }
 
 void MainWindow::initialiseScaleSpacesCombo()

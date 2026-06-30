@@ -68,6 +68,9 @@ public:
 
     void recomputeCache();
 
+signals:
+    void weightModeArbitrary();
+
 private:
     int range{ 0 };
 

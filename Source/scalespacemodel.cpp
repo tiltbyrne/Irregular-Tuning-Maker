@@ -520,7 +520,13 @@ int ScaleSpaceModel::getPrecision() const
 
 void ScaleSpaceModel::setWeightMode(WeightMode newWeightMode)
 {
+    if (weightMode == newWeightMode)
+        return;
+
     weightMode = newWeightMode;
+
+    if (newWeightMode == WeightMode::Arbitrary)
+        weightModeArbitrary();
 }
 
 void ScaleSpaceModel::setWeightFunction(const WeightFunction &newWeightFunction)
