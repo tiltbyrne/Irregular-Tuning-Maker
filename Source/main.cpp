@@ -7,11 +7,11 @@ int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
     app.setApplicationName(globals::appName);
-    app.setWindowIcon(QIcon(":/icon.png"));
-
+    app.setApplicationDisplayName(globals::appName);
     dbManager::initialise();
 
     MainWindow w;
+\
     w.show();
 
     return app.exec();

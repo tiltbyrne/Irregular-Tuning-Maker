@@ -11,6 +11,7 @@ qt_standard_project_setup()
 
 qt_add_executable(TuningMakerGUI
     WIN32 MACOSX_BUNDLE
+
     main.cpp
     mainwindow.cpp
     mainwindow.h
@@ -33,6 +34,12 @@ qt_add_executable(TuningMakerGUI
     fractionParser.h
     toFraction.h
     scalespacemodel.h scalespacemodel.cpp
+)
+
+qt_add_resources(TuningMakerGUI "app_resources"
+    PREFIX "/"
+    FILES
+        images/icon.png
 )
 
 target_link_libraries(TuningMakerGUI

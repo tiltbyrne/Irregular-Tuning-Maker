@@ -33,7 +33,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     QApplication::instance()->installEventFilter(this);
     initialiseWindow();
-    setWindowIcon(QIcon(":/icon.png"));
 
     initialiseDisplaySettings();
     initialiseMakeCancelButtons();
@@ -415,6 +414,7 @@ void MainWindow::initialiseAttenuationSlider()
 
 void MainWindow::initialiseWindow()
 {
+    setWindowIcon(QIcon(":/images/icon.png"));
     setWindowTitle(settings::scaleSpaceName + " - " + globals::appName);
 }
 
@@ -664,47 +664,42 @@ void MainWindow::handleSaveSubScaleSpaceAs()
                                                 QDir::currentPath(),
                                                 "Scale Spaces (*." + dbUtils::filetypeName + ")") };
 
-    if (!url.isValid() || url.isEmpty())
+    if (!url.isValid() || url.isEmpty() || !dbManager::createDatabase(url))
         return;
 
-    if (dbManager::createDatabase(url))
+    const auto newDatabase{ dbManager::openDatabase(url) };
+
+    std::vector<int> notesToSave{ selectedNotes };
+
+    if (notesToSave.empty())
     {
-        const auto newDatabase{ dbManager::openDatabase(url) };
+        const auto range{ ui->rangeSpinBox->value() };
+        notesToSave.reserve(range);
 
-        std::vector<int> notesToSave{ selectedNotes };
-
-        if (notesToSave.empty())
-        {
-            const auto range{ ui->rangeSpinBox->value() };
-            notesToSave.reserve(range);
-
-            for (auto note{ 0 }; note != range; ++note)
-                notesToSave.push_back(note);
-        }
-
-        newDatabase->savePattern(
-            scaleSpace.makeSubSizePattern(notesToSave));
-
-        QFileInfo info{ url.toLocalFile() };
-
-        const auto file{ QFileInfo(dbUtils::makeUrlString(info.baseName(), info.absolutePath())) };
-
-        currentFileUrl = QUrl::fromLocalFile(file.filePath());
-
-        emit currentUrlChanged(currentFileUrl);
-
-        changeTable(file.baseName(), newDatabase);
-
-        ui->scaleSpaceCombo->setCurrentIndex(ui->scaleSpaceCombo->findText(settings::customScaleSpaceName));
+        for (auto note{ 0 }; note != range; ++note)
+            notesToSave.push_back(note);
     }
+
+    newDatabase->savePattern(
+        scaleSpace.makeSubSizePattern(notesToSave));
+
+    QFileInfo info{ url.toLocalFile() };
+
+    const auto file{ QFileInfo(dbUtils::makeUrlString(info.baseName(), info.absolutePath())) };
+
+    currentFileUrl = QUrl::fromLocalFile(file.filePath());
+
+    emit currentUrlChanged(currentFileUrl);
+
+    changeTable(file.baseName(), newDatabase, false);
+
+    ui->scaleSpaceCombo->setCurrentIndex(ui->scaleSpaceCombo->findText(settings::customScaleSpaceName));
 }
 
 void MainWindow::handleMakeClicked()
 {
-    if (future.isRunning() || !ui->makeButton->isEnabled())
-        return;
-
-    ui->makeButton->setDisabled(true);
+    if (future.isRunning())
+        tuneScaleCancelRequested = true;
 
     ui->cancelButton->setEnabled(true);
 
@@ -749,7 +744,7 @@ void MainWindow::handleCancelClicked()
 
     tuneScaleCancelRequested = true;
 
-    ui->makeButton->setEnabled(true);
+    //ui->makeButton->setEnabled(true);
 
     ui->cancelButton->setDisabled(true);
 
@@ -974,8 +969,6 @@ void MainWindow::initialiseRangeSpinBox()
             this,
             [this]()
             {
-                qDebug() << model->getRange() << settings::maxTableSize - scaleSpace.storedSize();
-
                 if (model->getRange() <= settings::maxTableSize - scaleSpace.storedSize())
                     ui->rangeSpinBox->setValue(ui->rangeSpinBox->value() + scaleSpace.storedSize());
             });
@@ -1179,9 +1172,8 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             handleSaveSubScaleSpaceAs();
             return true;
         }
-        if ((keyEvent->key() == Qt::Key_Return ||
-             keyEvent->key() == Qt::Key_Enter) &&
-            (keyEvent->modifiers() & Qt::ControlModifier))
+        if (keyEvent->key() == Qt::Key_Return ||
+             keyEvent->key() == Qt::Key_Enter)
         {
             handleMakeClicked();
             return true;
@@ -1241,7 +1233,7 @@ void MainWindow::changeScaleSpace(const QString& newScaleSpaceName, const QStrin
 
 }
 
-void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase)
+void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase, const bool& shouldAdjustRange)
 {
     if (newDatabase.get() == nullptr)
         return;
@@ -1250,9 +1242,8 @@ void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCur
 
     scaleSpace.setScaleSpace(newName, newDatabase->loadPattern());
 
-    //QSignalBlocker blocker(ui->rangeSpinBox);
-
-    ui->rangeSpinBox->setValue(makeAdjustedRange(model->getRange(), oldSize, scaleSpace.storedSize()));
+    if (shouldAdjustRange)
+        ui->rangeSpinBox->setValue(makeAdjustedRange(model->getRange(), oldSize, scaleSpace.storedSize()));
 
     model->recomputeCache();
 

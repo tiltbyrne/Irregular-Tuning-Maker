@@ -265,6 +265,12 @@
               <property name="inputMethodHints">
                <set>Qt::InputMethodHint::ImhNone</set>
               </property>
+              <property name="undoRedoEnabled">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::NoTextInteraction</set>
+              </property>
               <property name="placeholderText">
                <string/>
               </property>

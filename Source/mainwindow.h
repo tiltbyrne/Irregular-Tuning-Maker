@@ -88,7 +88,7 @@ private:
 
     bool eventFilter(QObject *obj, QEvent *event) override;
     void changeScaleSpace(const QString& newScaleSpaceName, const QString& newScaleSpaceDirectory);
-    void changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase);
+    void changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase, const bool& shouldAdjustRange = true);
 
     //QStandardItemModel* currentModel() const;
     void swapIntervalMode();
