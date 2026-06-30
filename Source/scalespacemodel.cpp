@@ -174,7 +174,7 @@ long double ScaleSpaceModel::sizeValue(const int &noteFrom, const int &noteTo) c
     if (noteFrom >= range || noteTo >= range)
         return calculateIntervalWeight(scaleSpace->getIntervalSize(noteTo, noteFrom));
 
-    return cellCache(noteFrom, noteTo).interval.getWeight();
+    return cellCache(noteFrom, noteTo).interval.getSize();
 }
 
 QString ScaleSpaceModel::makeValue(int noteFrom, int noteTo) const
@@ -466,6 +466,20 @@ long double ScaleSpaceModel::weightValue(const int &noteFrom, const int &noteTo)
         return calculateIntervalWeight(scaleSpace->getIntervalSize(noteTo, noteFrom));
 
     return cellCache(noteFrom, noteTo).interval.getWeight();
+}
+
+long double ScaleSpaceModel::currentValue(const int &noteFrom, const int &noteTo) const
+{
+    switch (intervalMode)
+    {
+    case IntervalMode::size:
+        return sizeValue(noteFrom, noteTo);
+        break;
+
+    case IntervalMode::weight:
+        return weightValue(noteFrom, noteTo);
+        break;
+    }
 }
 
 QString ScaleSpaceModel::weightText(long double intervalWeight) const

@@ -46,8 +46,11 @@ public:
     QString sizeText(long double intervalSize) const;
 
     long double weightValue(const int& noteFrom, const int& noteTo) const;
+
     //QString weightText(const int& noteFrom, const int& noteTo) const;
     QString weightText(long double intervalWeight) const;
+
+    long double currentValue(const int& noteFrom, const int& noteTo) const;
 
     Interval interval(const int& noteFrom, const int& noteTo) const;
 

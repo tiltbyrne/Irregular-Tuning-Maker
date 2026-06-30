@@ -266,7 +266,7 @@ void MainWindow::initialiseTable()
     ui->scaleSpaceTable->setModel(model);
     ui->scaleSpaceTable->installEventFilter(this);
 
-    ui->scaleSpaceTable->viewport()->installEventFilter(this);
+    //ui->scaleSpaceTable->viewport()->installEventFilter(this);
 
     auto* horizontalHeader{ new CustomHeaderView(scaleSpace.size(),
                                                  Qt::Horizontal,
@@ -874,6 +874,7 @@ void MainWindow::displayTuning()
         ui->temperamentBox->appendPlainText(ldtqs(centsFromRatio(note), settings::precisionMax, false));
 
     ui->temperamentBox->verticalScrollBar()->setValue(0);
+    ui->temperamentBox->moveCursor(QTextCursor::Start);
 }
 
 QString MainWindow::makeTooltipText(const QModelIndex &index)
@@ -1198,17 +1199,13 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
             if (idx.isValid() && keyEvent->matches(QKeySequence::Copy))
             {
-                QGuiApplication::clipboard()->setText(
-                    idx.data(Qt::DisplayRole).toString());
+                QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
 
                 return true;
             }
             if (idx.isValid() && keyEvent->matches(QKeySequence::Paste))
             {
-                ui->scaleSpaceTable->model()->setData(
-                    idx,
-                    QGuiApplication::clipboard()->text(),
-                    Qt::EditRole);
+                ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
 
                 return true;
             }
