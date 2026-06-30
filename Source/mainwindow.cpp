@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QThread>
 #include <QToolTip>
+#include <QScrollBar>
 
 #include "weights.h"
 #include "settings.h"
@@ -871,6 +872,8 @@ void MainWindow::displayTuning()
     ui->temperamentBox->appendPlainText("\nCents as tuning:");
     for (const auto& note : currentTuning)
         ui->temperamentBox->appendPlainText(ldtqs(centsFromRatio(note), settings::precisionMax, false));
+
+    ui->temperamentBox->verticalScrollBar()->setValue(0);
 }
 
 QString MainWindow::makeTooltipText(const QModelIndex &index)
