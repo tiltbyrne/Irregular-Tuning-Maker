@@ -888,12 +888,14 @@ void MainWindow::displayTuning()
 
 QString MainWindow::makeTooltipText(const QModelIndex &index)
 {
-    const auto size{ scaleSpace.getIntervalSize(index.column(), index.row()) };
+    //const auto size{ scaleSpace.getIntervalSize(index.column(), index.row()) };
+
+    const auto interval{ model->interval(index.row(), index.column()) };
 
     return { QString("Interval: %1 --> %2").arg(index.row() + 1).arg(index.column() + 1) +
-            "\nSize (d): " + ldtqs(size, settings::precisionMax, false) +
-            "\nSize (c): " + ldtqs(centsFromRatio(size), settings::precisionMax, true) +
-            "\nWeight: " + ldtqs(model->weightValue(index.column(), index.row()), settings::precisionMax, true) };
+            "\nSize (d): " + ldtqs(interval.getSize(), settings::precisionMax, false) +
+            "\nSize (c): " + ldtqs(centsFromRatio(interval.getSize()), settings::precisionMax, true) +
+            "\nWeight: " + ldtqs(interval.getWeight(), settings::precisionMax, true) };
 }
 
 void MainWindow::updateSaveButtonStates()
