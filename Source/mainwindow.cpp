@@ -19,6 +19,7 @@
 #include "utilities.h"
 #include "customheaderview.h"
 #include "scale.h"
+#include "scalespacedelegate.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -265,6 +266,10 @@ void MainWindow::initialiseTable()
     ///
     ui->scaleSpaceTable->setModel(model);
     ui->scaleSpaceTable->installEventFilter(this);
+    ui->scaleSpaceTable->setItemDelegate(new ScaleSpaceDelegate(&scaleSpace, ui->scaleSpaceTable));
+    ui->scaleSpaceTable->setMouseTracking(true);
+
+    ui->scaleSpaceTable->viewport()->setMouseTracking(true);
 
     //ui->scaleSpaceTable->viewport()->installEventFilter(this);
 
@@ -888,11 +893,9 @@ void MainWindow::displayTuning()
 
 QString MainWindow::makeTooltipText(const QModelIndex &index)
 {
-    //const auto size{ scaleSpace.getIntervalSize(index.column(), index.row()) };
-
     const auto interval{ model->interval(index.row(), index.column()) };
 
-    return { QString("Interval: %1 --> %2").arg(index.row() + 1).arg(index.column() + 1) +
+    return { QString("Interval: [%1, %2]").arg(index.row() + 1).arg(index.column() + 1) +
             "\nSize (d): " + ldtqs(interval.getSize(), settings::precisionMax, false) +
             "\nSize (c): " + ldtqs(centsFromRatio(interval.getSize()), settings::precisionMax, true) +
             "\nWeight: " + ldtqs(interval.getWeight(), settings::precisionMax, true) };
@@ -900,9 +903,6 @@ QString MainWindow::makeTooltipText(const QModelIndex &index)
 
 void MainWindow::updateSaveButtonStates()
 {
-    QElapsedTimer timer;
-    timer.start();
-
     //const auto subScaleSpaceIsSaveable{ ui->scaleSpaceTable->selectionModel()->hasSelection() };
 
     //qDebug() << "Checking savability took" << timer.elapsed() << "ms";
@@ -931,7 +931,7 @@ void MainWindow::handleAddNote(int noteToAdd)
                                                  initialSize,
                                                  initialSize + 1));
 
-    model->recomputeCache();
+    model->reset();
 
     //populateModels();
 }
@@ -948,7 +948,7 @@ void MainWindow::handleDeleteNote(int noteToDelete)
                                                  initialSize,
                                                  initialSize - 1));
 
-    model->recomputeCache();
+    model->reset();
     //populateModels();
 }
 
@@ -1007,13 +1007,32 @@ void MainWindow::initialiseRangeSpinBox()
 
 void MainWindow::handleRangeChanged(const int& range)
 {
+    const auto hasSelection{ ui->scaleSpaceTable->selectionModel()->hasSelection() };
+
+    QModelIndex selection;
+
+    if (hasSelection)
+        selection = ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0];
+
     model->setRange(range);
+
+    if (!hasSelection)
+        return;
+
+    if (selection.row() < range && selection.column() < range)
+    {
+        ui->scaleSpaceTable->setFocus();
+
+        ui->scaleSpaceTable->setCurrentIndex(selection);
+
+        ui->scaleSpaceTable->scrollTo(selection);
+
+        ui->scaleSpaceTable->selectionModel()->select(selection, QItemSelectionModel::SelectCurrent);
+    }
 }
 
 void MainWindow::handleClearSelection()
 {
-    ui->scaleSpaceTable->selectionModel()->clearSelection();
-
     selectedNotes = {};
 
     ui->selectionBox->clear();
@@ -1163,18 +1182,16 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
     if (event->type() == QEvent::KeyPress)
     {
-
-
         auto *keyEvent{ static_cast<QKeyEvent*>(event) };
 
         if (keyEvent->key() == Qt::Key_Tab)
         {
-            swapIntervalMode();
+            swapDisplayMode();
             return true;
         }
         if (keyEvent->key() == Qt::Key_Space)
         {
-            swapDisplayMode();
+            swapIntervalMode();
             return true;
         }
         if (keyEvent->matches(QKeySequence::Save))
@@ -1187,18 +1204,21 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             handleSaveSubScaleSpaceAs();
             return true;
         }
-        if (keyEvent->key() == Qt::Key_Return ||
-             keyEvent->key() == Qt::Key_Enter)
+        if ((keyEvent->key() == Qt::Key_Return ||
+             keyEvent->key() == Qt::Key_Enter) &&
+            keyEvent->modifiers() == Qt::ControlModifier)
         {
             handleMakeClicked();
             return true;
         }
-        if (keyEvent->matches(QKeySequence::Cancel))
+        if (keyEvent->key() == Qt::Key_Delete &&
+            keyEvent->modifiers() == Qt::ControlModifier)
         {
             handleCancelClicked();
             return true;
         }
-        if (keyEvent->key() == Qt::Key_Delete && keyEvent->modifiers() == Qt::ControlModifier)
+        if (keyEvent->key() == Qt::Key_Backspace &&
+            keyEvent->modifiers() == Qt::ControlModifier)
         {
             handleClearClicked();
             return true;
@@ -1256,7 +1276,7 @@ void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCur
     if (shouldAdjustRange)
         ui->rangeSpinBox->setValue(makeAdjustedRange(model->getRange(), oldSize, scaleSpace.storedSize()));
 
-    model->recomputeCache();
+    model->reset();
 
     setWindowTitle(newName + " - " + globals::appName);
 }

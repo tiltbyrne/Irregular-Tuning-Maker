@@ -34,6 +34,7 @@ qt_add_executable(TuningMakerGUI
     fractionParser.h
     toFraction.h
     scalespacemodel.h scalespacemodel.cpp
+    scalespacedelegate.h scalespacedelegate.cpp
 )
 
 qt_add_resources(TuningMakerGUI "app_resources"

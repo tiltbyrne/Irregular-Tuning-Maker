@@ -66,7 +66,7 @@ public:
 
     DisplayMode getDisplayMode() const;
 
-    void recomputeCache();
+    void reset();
 
 signals:
     void weightModeArbitrary();
@@ -88,36 +88,6 @@ private:
 
     WeightFunction weightFunction;
 
-    /*
-    struct IntervalKey
-    {
-        int noteFrom;
-        int noteTo;
-
-        bool operator==(const IntervalKey& other) const
-        {
-            return noteFrom == other.noteFrom &&
-                   noteTo   == other.noteTo;
-        }
-
-        bool operator<(const IntervalKey& other) const
-        {
-            return std::tie(noteFrom, noteTo) <
-                   std::tie(other.noteFrom, other.noteTo);
-        }
-    };
-
-    struct IntervalKeyHash
-    {
-        std::size_t operator()(const IntervalKey& key) const
-        {
-            std::size_t h1 = std::hash<int>{}(key.noteFrom);
-            std::size_t h2 = std::hash<int>{}(key.noteTo);
-
-            return h1 ^ (h2 + 0x9e3779b9 + (h1 << 6) + (h1 >> 2));
-        }
-    };
-*/
     struct CellCache
     {
         CellCache()
@@ -135,10 +105,6 @@ private:
 
     using TableCache = std::vector<CellCache>;
     mutable TableCache cache;
-
-    //mutable std::unordered_map<IntervalKey, QString, IntervalKeyHash> sizeDisplayCache;
-
-    //mutable std::unordered_map<IntervalKey, QString, IntervalKeyHash> weightDisplayCache;
 
     QString makeValue(int noteFrom, int noteTo) const;
 
@@ -158,7 +124,7 @@ private:
 
     void updateCacheWeight(const long double& newWeight, const int& noteFrom, const int& noteTo) const;
 
-    void precomputeCache(const int& oldRange = 0) const;
+    void updateCache(const int& oldRange = 0) const;
 
     void refreshSizeDisplayCache() const;
 
@@ -168,13 +134,13 @@ private:
 
     CellCache& cellCache(const int& noteFrom, const int& noteTo) const;
 
+    QString calculateValue(const int& noteFrom, const int& noteTo) const;
+
     void resizeCache(const int& oldRange) const;
 
     void resizeCacheColumns(const int& newRange) const;
 
     CellCache* cacheRow(const int& noteFrom) const;
-
-    bool itemShouldBeAltColour(const int& noteFrom, const int& noteTo) const;
 };
 
 #endif // SCALESPACEMODEL_H

@@ -22,7 +22,7 @@ ScaleSpaceModel::ScaleSpaceModel(ScaleSpace *initialScaleSpace, QObject *parent)
     , precision(settings::precision)
     , weightFunction([](long double size){return 1.L;})
 {
-    precomputeCache();
+    updateCache();
 }
 
 int ScaleSpaceModel::rowCount(const QModelIndex &parent) const
@@ -43,33 +43,10 @@ int ScaleSpaceModel::columnCount(const QModelIndex &parent) const
 
 QVariant ScaleSpaceModel::data(const QModelIndex &index, int role) const
 {
-    if ((role != Qt::DisplayRole && role != Qt::BackgroundRole) || !index.isValid())
+    if ((role != Qt::DisplayRole /*&& role != Qt::BackgroundRole*/) || !index.isValid())
         return {};
 
-    const int noteFrom{ index.row() },
-              noteTo{ index.column() };
-
-    if (noteFrom >= range || noteTo >= range)
-        return {};
-
-    switch (role)
-    {
-    case Qt::DisplayRole:
-        return makeValue(noteFrom, noteTo);
-        break;
-
-    case Qt::BackgroundRole:
-
-        const auto& palette = QApplication::palette();
-
-        if (itemShouldBeAltColour(noteFrom, noteTo))
-            return palette.color(QPalette::AlternateBase);
-
-        return palette.color(QPalette::Base);
-        break;
-    }
-
-    return {};
+    return makeValue(index.row(), index.column());
 }
 
 bool ScaleSpaceModel::setData(const QModelIndex &index, const QVariant &value, int role)
@@ -108,7 +85,7 @@ void ScaleSpaceModel::setRange(int newRange)
 
     range = newRange;
 
-    precomputeCache(oldRange);
+    updateCache(oldRange);
 
     endResetModel();
 }
@@ -124,7 +101,7 @@ void ScaleSpaceModel::setScaleSpace(ScaleSpace* newScaleSpace)
 
     scaleSpace = newScaleSpace;
 
-    precomputeCache();
+    updateCache();
 
     endResetModel();
 }
@@ -179,6 +156,9 @@ long double ScaleSpaceModel::sizeValue(const int &noteFrom, const int &noteTo) c
 
 QString ScaleSpaceModel::makeValue(int noteFrom, int noteTo) const
 {
+    if (noteFrom >= range || noteTo >= range)
+        return calculateValue(noteFrom, noteTo);
+
     switch (intervalMode)
     {
     case IntervalMode::size:
@@ -190,7 +170,7 @@ QString ScaleSpaceModel::makeValue(int noteFrom, int noteTo) const
         break;
     }
 
-    return QString("ERROR");
+    return QString("Invalid Interval Mode");
 }
 
 long double ScaleSpaceModel::calculateIntervalWeight(const long double &intervalSize) const
@@ -282,6 +262,8 @@ void ScaleSpaceModel::setSizeData(const QModelIndex &index, const long double &d
                                     std::pow(data,
                                              static_cast<long double>(scaleSpaceSize /
                                              static_cast<long double>(column - row))));
+
+        updateCache();
 
         emit dataChanged(this->index(0, 0), this->index(range - 1, range - 1), {Qt::DisplayRole, Qt::EditRole});
     }
@@ -386,7 +368,7 @@ void ScaleSpaceModel::updateCacheWeight(const long double& newWeight, const int&
     cellCache(noteTo, noteFrom).displayWeight = weightText(newWeight);
 }
 
-void ScaleSpaceModel::precomputeCache(const int& oldRange) const
+void ScaleSpaceModel::updateCache(const int& oldRange) const
 {
     resizeCache(oldRange);
 
@@ -448,6 +430,22 @@ ScaleSpaceModel::CellCache* ScaleSpaceModel::cacheRow(const int& noteFrom) const
 ScaleSpaceModel::CellCache& ScaleSpaceModel::cellCache(const int &noteFrom, const int &noteTo) const
 {
     return cache[noteFrom * range + noteTo];
+}
+
+QString ScaleSpaceModel::calculateValue(const int& noteFrom, const int& noteTo) const
+{
+    const auto intervalSize{ scaleSpace->getIntervalSize(noteTo, noteFrom) };
+
+    const auto modeIsCents{ displayMode == DisplayMode::cents };
+
+    if (intervalMode == IntervalMode::size)
+    {
+        return ldtqs(modeIsCents ? centsFromRatio(intervalSize) : intervalSize, precision, modeIsCents);
+    }
+    else
+    {
+        return ldtqs(calculateIntervalWeight(intervalSize), precision, true);
+    }
 }
 
 QString ScaleSpaceModel::sizeText(long double intervalSize) const
@@ -552,17 +550,11 @@ DisplayMode ScaleSpaceModel::getDisplayMode() const
     return displayMode;
 }
 
-void ScaleSpaceModel::recomputeCache()
+void ScaleSpaceModel::reset()
 {
     beginResetModel();
 
-    precomputeCache();
+    updateCache();
 
     endResetModel();
-}
-
-bool ScaleSpaceModel::itemShouldBeAltColour(const int& noteFrom, const int& noteTo) const
-{
-    const auto scaleSize{ scaleSpace->storedSize() };
-    return posMod(noteFrom / scaleSize, 2) != posMod(noteTo / scaleSize, 2);
 }
