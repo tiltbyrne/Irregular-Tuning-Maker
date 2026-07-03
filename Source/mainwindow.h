@@ -15,6 +15,7 @@
 #include "settings.h"
 #include "interval.h"
 #include "scalespacemodel.h"
+#include "scalespacedelegate.h"
 
 using IntervalsPattern = std::vector<std::vector<Interval>>;
 using SizeToWeightFunction = std::function<long double(const long double&)>;
@@ -55,10 +56,21 @@ private slots:
     void handleSaveSubScaleSpace();
     void handleSaveSubScaleSpaceAs();
     void handleMakeClicked();
+    void startMaking();
+    void cancelMaking();
+    void clearTemperamentBox();
+
     void handleCancelClicked();
     void makingTuningFinished();
 
+    void handlePrecisionChanged(const int& range);
     void handleRangeChanged(const int& range);
+    void handleAttenuationChanged(const int& attenuation);
+    void handleCutoffChanged();
+    void handleWeightFuncChanged(const int& index);
+
+    void handleChangeDisplay(const DisplayMode& mode);
+    void handleChangeSizeWeight(const IntervalMode& mode);
 
 private:
     Ui::MainWindow *ui;
@@ -119,10 +131,6 @@ private:
 
     const long double getCutoffValue();
 
-    //void weightFunctionChanged(const int& newFunctionIndex);
-
-    //bool selectionIsSymetric() const;
-
     IntervalsPattern makeSubIntervalsPattern(std::vector<int> notes) const;
 
     void displayTuning();
@@ -132,6 +140,12 @@ private:
     void updateSaveButtonStates();
 
     void handleClearClicked();
+
+    void postModelResetSelect(const QModelIndex& index, const std::optional<QModelIndex>& oldIndex);
+
+    void setLastSelectedCell(const QModelIndex& index);
+
+    ScaleSpaceDelegate* getDelegate() const;
 };
 
 extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSize, const int& newScaleSpaceSize);

@@ -1,5 +1,6 @@
 #include <QPainter>
 #include <QApplication>
+#include <QAbstractItemView>
 
 #include "utilities.h"
 #include "scalespacedelegate.h"
@@ -14,6 +15,9 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
                                const QStyleOptionViewItem &option,
                                const QModelIndex &index) const
 {
+    if (!index.isValid())
+        return;
+
     QStyleOptionViewItem opt(option);
     initStyleOption(&opt, index);
 
@@ -30,16 +34,26 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
 
     painter->fillRect(opt.rect, colour);
 
-    if (opt.state & QStyle::State_HasFocus && opt.state & QStyle::State_Selected)
+    if ((opt.state & QStyle::State_HasFocus && opt.state & QStyle::State_Selected) ||
+        (lastSelectedIndex.has_value() && index == lastSelectedIndex.value()))
     {
-        const auto penWidth{ 2 };
-
         QPen pen(palette.color(QPalette::Text), 2);
         pen.setJoinStyle(Qt::MiterJoin);
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
 
         painter->drawRect(opt.rect.adjusted(1, 1, -1, -1));
+
+        if (auto *view{ qobject_cast<QAbstractItemView*>(parent()) })
+        {
+            const QRect rect{ view->visualRect(index) };
+            QMetaObject::invokeMethod(
+                view->viewport(),
+                [vp = view->viewport(), rect] { vp->update(rect); },
+                Qt::QueuedConnection);
+        }
+
+        setLastSelectedIndex(index);
     }
 
     opt.backgroundBrush = Qt::NoBrush;
@@ -51,6 +65,21 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
     const auto *style{ opt.widget ? opt.widget->style() : QApplication::style() };
 
     style->drawControl(QStyle::CE_ItemViewItem, &opt, painter, opt.widget);
+}
+
+std::optional<QModelIndex> ScaleSpaceDelegate::getLastSelectedIndex() const
+{
+    return lastSelectedIndex;
+}
+
+void ScaleSpaceDelegate::setLastSelectedIndex(std::optional<QModelIndex> newLastSelectedIndex) const
+{
+    lastSelectedIndex = newLastSelectedIndex;
+}
+
+void ScaleSpaceDelegate::setLastSelectedIndex(QModelIndex newLastSelectedIndex) const
+{
+    setLastSelectedIndex(std::make_optional(newLastSelectedIndex));
 }
 
 bool ScaleSpaceDelegate::itemShouldBeAltColour(const int& noteFrom, const int& noteTo) const

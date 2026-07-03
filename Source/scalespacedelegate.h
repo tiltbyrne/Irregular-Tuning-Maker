@@ -14,8 +14,14 @@ public:
                const QStyleOptionViewItem &option,
                const QModelIndex &index) const override;
 
+    std::optional<QModelIndex> getLastSelectedIndex() const;
+    void setLastSelectedIndex(std::optional<QModelIndex> newLastSelectedIndex) const;
+    void setLastSelectedIndex(QModelIndex newLastSelectedIndex) const;
+
 private:
     ScaleSpace* scaleSpace{ nullptr };
+
+    mutable std::optional<QModelIndex> lastSelectedIndex{ std::nullopt };
 
     bool itemShouldBeAltColour(const int& noteFrom, const int& noteTo) const;
 };

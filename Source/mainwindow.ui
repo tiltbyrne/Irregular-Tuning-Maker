@@ -75,6 +75,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="makeButton">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::ClickFocus</enum>
+          </property>
           <property name="text">
            <string>Make</string>
           </property>
@@ -82,6 +85,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="clearButton">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::ClickFocus</enum>
+          </property>
           <property name="text">
            <string>Clear</string>
           </property>
@@ -89,6 +95,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="cancelButton">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::ClickFocus</enum>
+          </property>
           <property name="text">
            <string>Cancel</string>
           </property>
@@ -97,10 +106,10 @@
         <item>
          <widget class="QLabel" name="label_7">
           <property name="text">
-           <string>Output</string>
+           <string>Maker Output</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
+           <set>Qt::AlignmentFlag::AlignCenter</set>
           </property>
          </widget>
         </item>
@@ -111,6 +120,9 @@
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::ClickFocus</enum>
           </property>
           <property name="acceptDrops">
            <bool>false</bool>
@@ -161,7 +173,10 @@
              </widget>
             </item>
             <item>
-             <widget class="QSpinBox" name="precisionSpinBox">
+             <widget class="CustomSpinBox" name="precisionSpinBox">
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::ClickFocus</enum>
+              </property>
               <property name="alignment">
                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
               </property>
@@ -176,6 +191,9 @@
             </item>
             <item>
              <widget class="QRadioButton" name="ratioRadioButton">
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::ClickFocus</enum>
+              </property>
               <property name="layoutDirection">
                <enum>Qt::LayoutDirection::LeftToRight</enum>
               </property>
@@ -186,6 +204,9 @@
             </item>
             <item>
              <widget class="QRadioButton" name="centsRadioButton">
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::ClickFocus</enum>
+              </property>
               <property name="text">
                <string>Cents</string>
               </property>
@@ -216,6 +237,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="saveButton">
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::ClickFocus</enum>
+              </property>
               <property name="text">
                <string>Save</string>
               </property>
@@ -223,6 +247,9 @@
             </item>
             <item>
              <widget class="QPushButton" name="saveAsButton">
+              <property name="focusPolicy">
+               <enum>Qt::FocusPolicy::ClickFocus</enum>
+              </property>
               <property name="text">
                <string>Save As</string>
               </property>
@@ -303,7 +330,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="scaleSpaceCombo"/>
+           <widget class="QComboBox" name="scaleSpaceCombo">
+            <property name="focusPolicy">
+             <enum>Qt::FocusPolicy::ClickFocus</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -323,7 +354,10 @@
            </widget>
           </item>
           <item>
-           <widget class="QSpinBox" name="rangeSpinBox">
+           <widget class="CustomSpinBox" name="rangeSpinBox">
+            <property name="focusPolicy">
+             <enum>Qt::FocusPolicy::ClickFocus</enum>
+            </property>
             <property name="minimum">
              <number>2</number>
             </property>
@@ -341,7 +375,7 @@
             <item>
              <widget class="QLabel" name="label_4">
               <property name="text">
-               <string>Table</string>
+               <string>Interval Table</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
@@ -352,6 +386,9 @@
              <layout class="QHBoxLayout" name="horizontalLayout_4">
               <item>
                <widget class="QRadioButton" name="sizeRadioButton">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::ClickFocus</enum>
+                </property>
                 <property name="text">
                  <string>Size</string>
                 </property>
@@ -359,6 +396,9 @@
               </item>
               <item>
                <widget class="QRadioButton" name="weightRadioButton">
+                <property name="focusPolicy">
+                 <enum>Qt::FocusPolicy::ClickFocus</enum>
+                </property>
                 <property name="text">
                  <string>Weight</string>
                 </property>
@@ -383,7 +423,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QComboBox" name="weightFuncCombo"/>
+           <widget class="QComboBox" name="weightFuncCombo">
+            <property name="focusPolicy">
+             <enum>Qt::FocusPolicy::ClickFocus</enum>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -409,6 +453,9 @@
         </item>
         <item>
          <widget class="QSlider" name="attenuationSlider">
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::ClickFocus</enum>
+          </property>
           <property name="maximum">
            <number>100</number>
           </property>
@@ -438,6 +485,13 @@
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>CustomSpinBox</class>
+   <extends>QSpinBox</extends>
+   <header>customspinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

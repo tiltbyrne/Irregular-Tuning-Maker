@@ -524,7 +524,7 @@ void ScaleSpaceModel::setWeightMode(WeightMode newWeightMode)
     weightMode = newWeightMode;
 
     if (newWeightMode == WeightMode::Arbitrary)
-        weightModeArbitrary();
+        emit weightModeArbitrary();
 }
 
 void ScaleSpaceModel::setWeightFunction(const WeightFunction &newWeightFunction)
