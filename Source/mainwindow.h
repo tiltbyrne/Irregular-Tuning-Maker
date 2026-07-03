@@ -65,7 +65,7 @@ private slots:
 
     void handlePrecisionChanged(const int& range);
     void handleRangeChanged(const int& range);
-    void handleAttenuationChanged(const int& attenuation);
+    void handleAttenuationChanged(int attenuation);
     void handleCutoffChanged();
     void handleWeightFuncChanged(const int& index);
 

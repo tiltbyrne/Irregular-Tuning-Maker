@@ -873,7 +873,7 @@ void MainWindow::handleRangeChanged(const int& range)
     }
 }
 
-void MainWindow::handleAttenuationChanged(const int &attenuation)
+void MainWindow::handleAttenuationChanged(int attenuation)
 {
     if (ui->scaleSpaceTable->selectionModel()->hasSelection())
     {
@@ -914,6 +914,8 @@ void MainWindow::handleWeightFuncChanged(const int &index)
             }
             else
                 model->setWeightFunction(weightFunctions[index].second);
+
+            //ui->attenuationSlider->setValue(settings::attenuationMidpoint);
         } };
 
     if (ui->scaleSpaceTable->selectionModel()->hasSelection())
@@ -1089,7 +1091,7 @@ QString MainWindow::makeSizeItemText(const int& noteTo, const int& noteFrom) con
 
 void MainWindow::initialisePrecisionSpinBox()
 {
-    ui->precisionSpinBox->setRange(0, settings::precisionMax);
+    ui->precisionSpinBox->setRange(1, settings::precisionMax);
 
     ui->precisionSpinBox->setValue(settings::precision);
     model->setPrecision(settings::precision);
@@ -1159,6 +1161,30 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             keyEvent->modifiers() == Qt::ControlModifier)
         {
             handleClearClicked();
+            return true;
+        }
+        if (keyEvent->key() == Qt::Key_Up &&
+            keyEvent->modifiers() == Qt::ControlModifier)
+        {
+            ui->cutoffDial->setValue(ui->cutoffDial->value() + 1);
+            return true;
+        }
+        if (keyEvent->key() == Qt::Key_Down &&
+            keyEvent->modifiers() == Qt::ControlModifier)
+        {
+            ui->cutoffDial->setValue(ui->cutoffDial->value() - 1);
+            return true;
+        }
+        if (keyEvent->key() == Qt::Key_Left &&
+            keyEvent->modifiers() == Qt::ControlModifier)
+        {
+            ui->attenuationSlider->setValue(ui->attenuationSlider->value() - 1);
+            return true;
+        }
+        if (keyEvent->key() == Qt::Key_Right &&
+            keyEvent->modifiers() == Qt::ControlModifier)
+        {
+            ui->attenuationSlider->setValue(ui->attenuationSlider->value() + 1);
             return true;
         }
 
