@@ -19,6 +19,7 @@ ScaleSpaceModel::ScaleSpaceModel(ScaleSpace *initialScaleSpace, QObject *parent)
     , scaleSpace(initialScaleSpace)
     , range(initialScaleSpace->size())
     , attenuation(settings::attenuationMidpoint)
+    , oldAttenuation(settings::attenuationMidpoint)
     , precision(settings::precision)
     , weightFunction([](long double size){return 1.L;})
 {
@@ -319,10 +320,10 @@ void ScaleSpaceModel::setSizeData(const QModelIndex &index, const long double &d
 
 void ScaleSpaceModel::setWeightData(const QModelIndex &index, const long double &data)
 {
-    const auto value{ std::clamp(data, 0.L, 1.L) };
-
     if (weightMode == WeightMode::Deterministic)
         setWeightMode(WeightMode::Arbitrary);
+
+    const auto value{ std::clamp(data, 0.L, 1.L) };
 
     const auto row{ index.row() },
                column{ index.column() };
@@ -354,12 +355,21 @@ void ScaleSpaceModel::updateCache(const int& noteFrom, const int& noteTo) const
 void ScaleSpaceModel::updateCacheWeight(const int& noteFrom, const int& noteTo) const
 {
     if (weightMode == WeightMode::Arbitrary)
-        return;
+    {
+        const auto exponent{ std::pow(settings::attenuationScaling, 1 - (attenuation / settings::attenuationMidpoint)) };
 
-    updateCacheWeight(calculateIntervalWeight(scaleSpace->getIntervalSize(noteTo, noteFrom)), noteFrom, noteTo);
+        const auto base{ std::pow(cellCache(noteFrom, noteTo).interval.getWeight(),
+                                  1.L / std::pow(settings::attenuationScaling, 1 - (oldAttenuation / settings::attenuationMidpoint))) };
+
+        updateCacheWeight(std::pow(base, exponent), noteFrom, noteTo);
+    }
+    else
+    {
+        updateCacheWeight(calculateIntervalWeight(scaleSpace->getIntervalSize(noteTo, noteFrom)), noteFrom, noteTo);
+    }
 }
 
-void ScaleSpaceModel::updateCacheWeight(const long double& newWeight, const int& noteFrom, const int& noteTo) const
+void ScaleSpaceModel::updateCacheWeight(long double newWeight, const int& noteFrom, const int& noteTo) const
 {
     if (noteFrom >= range || noteTo >= range)
         return;
@@ -504,6 +514,8 @@ void ScaleSpaceModel::setAttenuation(int newAttenuation)
 
     beginResetModel();
 
+    oldAttenuation = attenuation;
+
     attenuation = newAttenuation;
 
     refreshWeightCache();
@@ -557,4 +569,9 @@ void ScaleSpaceModel::reset()
     updateCache();
 
     endResetModel();
+}
+
+WeightMode ScaleSpaceModel::getWeightMode() const
+{
+    return weightMode;
 }

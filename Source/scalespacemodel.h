@@ -68,6 +68,8 @@ public:
 
     void reset();
 
+    WeightMode getWeightMode() const;
+
 signals:
     void weightModeArbitrary();
 
@@ -78,13 +80,15 @@ private:
 
     int attenuation;
 
+    int oldAttenuation;
+
     ScaleSpace* scaleSpace{ nullptr };
 
     DisplayMode displayMode{ DisplayMode::ratio };
 
     IntervalMode intervalMode{ IntervalMode::size };
 
-    WeightMode weightMode{  WeightMode::Deterministic};
+    WeightMode weightMode{ WeightMode::Deterministic };
 
     WeightFunction weightFunction;
 
@@ -122,7 +126,7 @@ private:
 
     void updateCacheWeight(const int& noteFrom, const int& noteTo) const;
 
-    void updateCacheWeight(const long double& newWeight, const int& noteFrom, const int& noteTo) const;
+    void updateCacheWeight(long double newWeight, const int& noteFrom, const int& noteTo) const;
 
     void updateCache(const int& oldRange = 0) const;
 
