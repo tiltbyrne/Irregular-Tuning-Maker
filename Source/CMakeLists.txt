@@ -29,12 +29,15 @@ qt_add_executable(TuningMakerGUI
     dbManager.h dbManager.cpp
     dbcurrnet.h dbcurrnet.cpp
     globals.h
-    customheaderview.h customheaderview.cpp
+
 
     fractionParser.h
     toFraction.h
     scalespacemodel.h scalespacemodel.cpp
     scalespacedelegate.h scalespacedelegate.cpp
+
+    customheaderview.h customheaderview.cpp
+    customspinbox.h customspinbox.cpp
 )
 
 qt_add_resources(TuningMakerGUI "app_resources"
@@ -50,6 +53,10 @@ target_link_libraries(TuningMakerGUI
         Qt6::Sql
         Qt6::Concurrent
         Qt6::Gui
+)
+
+target_include_directories(TuningMakerGUI PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 include(GNUInstallDirs)
