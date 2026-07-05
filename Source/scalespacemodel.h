@@ -70,6 +70,8 @@ public:
 
     WeightMode getWeightMode() const;
 
+    QString defaultText() const;
+
 signals:
     void weightModeArbitrary();
 

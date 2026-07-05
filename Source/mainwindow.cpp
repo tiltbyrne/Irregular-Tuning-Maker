@@ -13,6 +13,7 @@
 #include <QToolTip>
 #include <QScrollBar>
 #include <QLineEdit>
+#include <QApplication>
 
 #include "weights.h"
 #include "settings.h"
@@ -679,15 +680,19 @@ void MainWindow::displayTuning()
     ui->temperamentBox->clear();
 
     if (currentTuning.empty())
-        return;
+    {
+        if (future.isRunning())
+            ui->temperamentBox->setPlainText("Making tuning...");
+        else
+            return;
+    }
 
-    ui->temperamentBox->appendPlainText("Decimals as tuning:");
-    for (const auto& note : currentTuning)
-        ui->temperamentBox->appendPlainText(ldtqs(note, settings::precisionMax, false));
-
-    ui->temperamentBox->appendPlainText("\nCents as tuning:");
-    for (const auto& note : currentTuning)
-        ui->temperamentBox->appendPlainText(ldtqs(centsFromRatio(note), settings::precisionMax, false));
+    if (model->getDisplayMode() == DisplayMode::cents)
+        for (const auto& note : currentTuning)
+            ui->temperamentBox->appendPlainText(ldtqs(centsFromRatio(note), settings::precisionMax, false));
+    else
+        for (const auto& note : currentTuning)
+            ui->temperamentBox->appendPlainText(ldtqs(note, settings::precisionMax, false));
 
     ui->temperamentBox->verticalScrollBar()->setValue(0);
     ui->temperamentBox->moveCursor(QTextCursor::Start);
@@ -1007,6 +1012,8 @@ void MainWindow::handleChangeDisplay(const DisplayMode &mode)
     {
         model->setDisplayMode(mode);
     }
+
+    displayTuning();
 }
 
 void MainWindow::handleChangeSizeWeight(const IntervalMode &mode)
@@ -1261,7 +1268,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                 }
                 if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
                 {
-                    ui->scaleSpaceTable->model()->setData(idx, QString("1"), Qt::EditRole);
+                    ui->scaleSpaceTable->model()->setData(idx, model->defaultText(), Qt::EditRole);
                     return true;
                 }
             }

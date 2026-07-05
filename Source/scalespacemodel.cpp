@@ -577,3 +577,16 @@ WeightMode ScaleSpaceModel::getWeightMode() const
 {
     return weightMode;
 }
+
+QString ScaleSpaceModel::defaultText() const
+{
+    switch (intervalMode)
+    {
+    case IntervalMode::size:
+        return displayMode == DisplayMode::ratio ? "1" : "0";
+        break;
+    case IntervalMode::weight:
+        return "1";
+        break;
+    }
+}

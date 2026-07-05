@@ -55,6 +55,8 @@ const QStringList scaleSpaceNames{ "5edo",
 
 const QString scaleSpaceName{ scaleSpaceNames[3] };
 
+const QColor highlight{255, 128, 0};
+
 }
 
 enum class DisplayMode

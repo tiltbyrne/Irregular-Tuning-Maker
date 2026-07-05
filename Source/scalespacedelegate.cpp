@@ -27,17 +27,17 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
 
     const auto& palette{ QApplication::palette() };
 
-    QColor colour{ palette.color(QPalette::Base) };
+    QColor colour{ palette.color(QPalette::Midlight) };
 
     if ((altBlock && !hovering) || (hovering && !altBlock))
-        colour = palette.color(QPalette::AlternateBase);
+        colour = palette.color(QPalette::Mid);
 
     painter->fillRect(opt.rect, colour);
 
     if ((opt.state & QStyle::State_HasFocus && opt.state & QStyle::State_Selected) ||
         (lastSelectedIndex.has_value() && index == lastSelectedIndex.value()))
     {
-        QPen pen(palette.color(QPalette::Text), 2);
+        QPen pen(palette.color(QPalette::Highlight), 2);
         pen.setJoinStyle(Qt::MiterJoin);
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
