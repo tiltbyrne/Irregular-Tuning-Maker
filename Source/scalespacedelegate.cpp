@@ -47,10 +47,12 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
         if (auto *view{ qobject_cast<QAbstractItemView*>(parent()) })
         {
             const QRect rect{ view->visualRect(index) };
-            QMetaObject::invokeMethod(
-                view->viewport(),
-                [vp = view->viewport(), rect] { vp->update(rect); },
-                Qt::QueuedConnection);
+            QMetaObject::invokeMethod( view->viewport(),
+                                      [vp = view->viewport(), rect]
+                                      {
+                                          vp->update(rect);
+                                      },
+                                      Qt::QueuedConnection);
         }
 
         setLastSelectedIndex(index);

@@ -432,14 +432,9 @@ void ScaleSpaceModel::resizeCache(const int& oldRange) const
     cache.swap(newCache);
 }
 
-ScaleSpaceModel::CellCache* ScaleSpaceModel::cacheRow(const int& noteFrom) const
-{
-    return &cache[noteFrom * range];
-}
-
 ScaleSpaceModel::CellCache& ScaleSpaceModel::cellCache(const int &noteFrom, const int &noteTo) const
 {
-    return cache[noteFrom * range + noteTo];
+    return cache.at(noteFrom * range + noteTo);
 }
 
 QString ScaleSpaceModel::calculateValue(const int& noteFrom, const int& noteTo) const

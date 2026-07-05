@@ -145,10 +145,14 @@ private:
 
     void setLastSelectedCell(const QModelIndex& index);
 
-    ScaleSpaceDelegate* getDelegate() const;
+    ScaleSpaceDelegate* tableDelegate() const;
+
+    void updateSelectionBox();
 };
 
 extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSize, const int& newScaleSpaceSize);
 extern bool inputIsValid(const QString& input);
+extern int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize);
+extern int postRemoveNoteShift(int baseNoteRemoved, const int originalNote, const int& scaleSpaceSize);
 
 #endif // MAINWINDOW_H

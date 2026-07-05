@@ -143,8 +143,6 @@ private:
     void resizeCache(const int& oldRange) const;
 
     void resizeCacheColumns(const int& newRange) const;
-
-    CellCache* cacheRow(const int& noteFrom) const;
 };
 
 #endif // SCALESPACEMODEL_H

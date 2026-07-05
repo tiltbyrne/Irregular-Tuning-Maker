@@ -65,16 +65,14 @@ void MainWindow::handleScaleSpaceActivated(QString selection)
     if (selection == scaleSpace.getName() &&
         selection != settings::customScaleSpaceName)
     {
-        if (getDelegate()->getLastSelectedIndex())
-            postModelResetSelect(getDelegate()->getLastSelectedIndex().value(), std::nullopt);
+        if (tableDelegate()->getLastSelectedIndex())
+            postModelResetSelect(tableDelegate()->getLastSelectedIndex().value(), std::nullopt);
 
         return;
     }
 
-    getDelegate()->setLastSelectedIndex(std::nullopt);
-
+    tableDelegate()->setLastSelectedIndex(std::nullopt);
     selectedNotes.clear();
-
     ui->scaleSpaceTable->selectionModel()->clearSelection();
     ui->selectionBox->clear();
 
@@ -300,6 +298,7 @@ void MainWindow::initialiseAttenuationSlider()
             this,
             &MainWindow::handleAttenuationChanged);
 
+    /*
     connect(ui->attenuationSlider,
             &QDial::sliderReleased,
             ui->attenuationSlider,
@@ -307,6 +306,7 @@ void MainWindow::initialiseAttenuationSlider()
             {
                 handleAttenuationChanged(ui->attenuationSlider->value());
             });
+*/
 }
 
 void MainWindow::initialiseWindow()
@@ -376,20 +376,7 @@ void MainWindow::handleHeaderLeftClicked(int logicalIndex)
 
     std::sort(selectedNotes.begin(), selectedNotes.end());
 
-    ui->selectionBox->clear();
-
-    if (!selectedNotes.empty())
-    {
-        QStringList list;
-
-        for (const auto& note : selectedNotes)
-            list << QString::number(note + 1);
-
-        QString output{ "Selection: " };
-        output.append(list.join(", "));
-
-        ui->selectionBox->appendPlainText(output);
-    }
+    updateSelectionBox();
 
     updateSaveButtonStates();
 }
@@ -438,7 +425,7 @@ void MainWindow::handleSaveSubScaleSpaceAs()
     if (!ui->saveAsButton->isEnabled())
         return;
 
-    getDelegate()->setLastSelectedIndex(std::nullopt);
+    tableDelegate()->setLastSelectedIndex(std::nullopt);
 
     const auto url{ QFileDialog::getSaveFileUrl(this,
                                                 "Save File",
@@ -483,7 +470,7 @@ void MainWindow::handleMakeClicked()
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         startMaking();
 
@@ -565,7 +552,7 @@ void MainWindow::handleCancelClicked()
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         cancelMaking();
 
@@ -582,7 +569,7 @@ void MainWindow::makingTuningFinished()
     if (tuneScaleCancelRequested)
         return;
 
-    getDelegate()->setLastSelectedIndex(std::nullopt);
+    tableDelegate()->setLastSelectedIndex(std::nullopt);
 
     ui->makeButton->setEnabled(true);
 
@@ -601,7 +588,7 @@ void MainWindow::handlePrecisionChanged(const int &range)
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         model->setPrecision(range);
 
@@ -621,7 +608,7 @@ void MainWindow::handleSaveSubScaleSpace()
         return;
     }
 
-    getDelegate()->setLastSelectedIndex(std::nullopt);
+    tableDelegate()->setLastSelectedIndex(std::nullopt);
 
     std::vector<int> notesToSave{ selectedNotes };
 
@@ -728,7 +715,7 @@ void MainWindow::handleClearClicked()
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         clearTemperamentBox();
 
@@ -757,18 +744,32 @@ void MainWindow::postModelResetSelect(const QModelIndex &index, const std::optio
         ui->scaleSpaceTable->update(oldIndex.value());
 }
 
-ScaleSpaceDelegate* MainWindow::getDelegate() const
+ScaleSpaceDelegate* MainWindow::tableDelegate() const
 {
     return dynamic_cast<ScaleSpaceDelegate*>(ui->scaleSpaceTable->itemDelegate());
+}
+
+void MainWindow::updateSelectionBox()
+{
+    ui->selectionBox->clear();
+
+    if (!selectedNotes.empty())
+    {
+        QStringList list;
+
+        for (const auto& note : selectedNotes)
+            list << QString::number(note + 1);
+
+        QString output{ "Selection: " };
+        output.append(list.join(", "));
+
+        ui->selectionBox->appendPlainText(output);
+    }
 }
 
 void MainWindow::handleAddNote(int noteToAdd)
 {
     const auto initialSize{ scaleSpace.storedSize() };
-
-    const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
-
-    const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
 
     scaleSpace.addNote(noteToAdd);
 
@@ -778,20 +779,24 @@ void MainWindow::handleAddNote(int noteToAdd)
 
     model->reset();
 
-    if (ui->scaleSpaceTable->selectionModel()->hasSelection() && selection.row() != noteToAdd && selection.column() != noteToAdd)
-        postModelResetSelect(selection, oldSelection);
+    auto baseNoteToAdd{ scaleSpace.getBaseNote(noteToAdd) };
+
+    if (const auto selection{ tableDelegate()->getLastSelectedIndex()})
+        postModelResetSelect(model->index(postAddNoteShift(baseNoteToAdd, selection.value().row(), initialSize),
+                                          postAddNoteShift(baseNoteToAdd, selection.value().column(), initialSize)),
+                             selection.value());
+
+    for (auto& note : selectedNotes)
+        note = postAddNoteShift(baseNoteToAdd, note, initialSize);
+
+    updateSelectionBox();
 }
 
 void MainWindow::handleDeleteNote(int noteToDelete)
 {
     const auto initialSize{ scaleSpace.storedSize() };
 
-    //const auto hasSelection{ ui->scaleSpaceTable->selectionModel()->hasSelection() };
-
-    const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
-
-    //const auto oldSelection{ dynamic_cast<ScaleSpaceDelegate*>(ui->scaleSpaceTable->itemDelegate())
-    //                            ->getLastSelectedIndex() };
+    auto baseNoteToDelete{ scaleSpace.getBaseNote(noteToDelete) };
 
     scaleSpace.removeNote(noteToDelete);
 
@@ -800,6 +805,38 @@ void MainWindow::handleDeleteNote(int noteToDelete)
                                                  initialSize - 1));
 
     model->reset();
+
+    const auto isDeleted{ [&baseNoteToDelete, &initialSize](const int& note)
+                         {
+                             return ((note - baseNoteToDelete) % initialSize) == 0;
+                         } };
+
+    if (const auto selection{ tableDelegate()->getLastSelectedIndex()})
+    {
+        if (!isDeleted(selection->row()) && !isDeleted(selection->column()))
+            postModelResetSelect(model->index(postRemoveNoteShift(baseNoteToDelete, selection.value().row(), initialSize),
+                                              postRemoveNoteShift(baseNoteToDelete, selection.value().column(), initialSize)),
+                                 selection.value());
+
+        else
+            tableDelegate()->setLastSelectedIndex(std::nullopt);
+    }
+
+    std::vector<int> indeciesToDelete;
+    for (auto index{ 0 }; index != selectedNotes.size(); ++index)
+    {
+        if (!isDeleted(selectedNotes[index]))
+            selectedNotes[index] = postRemoveNoteShift(baseNoteToDelete,
+                                                       selectedNotes[index],
+                                                       initialSize);
+        else
+            indeciesToDelete.push_back(index - indeciesToDelete.size());
+    }
+
+    for (const auto& index : indeciesToDelete)
+        selectedNotes.erase(selectedNotes.begin() + index);
+
+    updateSelectionBox();
 }
 
 void MainWindow::initialiseRangeSpinBox()
@@ -861,7 +898,7 @@ void MainWindow::handleRangeChanged(const int& range)
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         model->setRange(range);
 
@@ -871,6 +908,24 @@ void MainWindow::handleRangeChanged(const int& range)
     {
         model->setRange(range);
     }
+
+    if (!selectedNotes.empty())
+    {
+        int newSize{ 0 };
+
+        for (const auto& note : selectedNotes)
+        {
+            if (note >= range)
+                break;
+
+            ++newSize;
+        }
+
+        selectedNotes.resize(newSize);
+
+        updateSelectionBox();
+    }
+
 }
 
 void MainWindow::handleAttenuationChanged(int attenuation)
@@ -879,7 +934,7 @@ void MainWindow::handleAttenuationChanged(int attenuation)
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         model->setAttenuation(attenuation);
 
@@ -898,7 +953,7 @@ void MainWindow::handleCutoffChanged()
 
     const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-    const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+    const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
     postModelResetSelect(selection, oldSelection);
 }
@@ -922,7 +977,7 @@ void MainWindow::handleWeightFuncChanged(const int &index)
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         setFunc(index);
 
@@ -942,7 +997,7 @@ void MainWindow::handleChangeDisplay(const DisplayMode &mode)
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         model->setDisplayMode(mode);
 
@@ -962,7 +1017,7 @@ void MainWindow::handleChangeSizeWeight(const IntervalMode &mode)
     {
         const auto selection{ ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0] };
 
-        const auto oldSelection{ getDelegate()->getLastSelectedIndex() };
+        const auto oldSelection{ tableDelegate()->getLastSelectedIndex() };
 
         model->setIntervalMode(mode);
 
@@ -1120,10 +1175,10 @@ void MainWindow::handleCurrentUrlChanged(QUrl newUrl)
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
+    auto *keyEvent{ static_cast<QKeyEvent*>(event) };
+
     if (event->type() == QEvent::KeyPress)
     {
-        auto *keyEvent{ static_cast<QKeyEvent*>(event) };
-
         if (keyEvent->key() == Qt::Key_Tab)
         {
             swapDisplayMode();
@@ -1192,15 +1247,23 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         {
             auto idx{ ui->scaleSpaceTable->currentIndex() };
 
-            if (idx.isValid() && keyEvent->matches(QKeySequence::Copy))
+            if (idx.isValid())
             {
-                QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
-                return true;
-            }
-            if (idx.isValid() && keyEvent->matches(QKeySequence::Paste))
-            {
-                ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
-                return true;
+                if (keyEvent->matches(QKeySequence::Copy))
+                {
+                    QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
+                    return true;
+                }
+                if (keyEvent->matches(QKeySequence::Paste))
+                {
+                    ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
+                    return true;
+                }
+                if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
+                {
+                    ui->scaleSpaceTable->model()->setData(idx, QString("1"), Qt::EditRole);
+                    return true;
+                }
             }
         }
     }
@@ -1211,14 +1274,15 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         const auto index{ ui->scaleSpaceTable->indexAt(helpEvent->pos()) };
 
         if (index.isValid())
-        {
             QToolTip::showText(helpEvent->globalPos(), makeTooltipText(index), ui->scaleSpaceTable);
-            return true;
-        }
+
+        return true;
     }
     if (event->type() == QEvent::FocusIn && obj == ui->temperamentBox)
     {
-        getDelegate()->setLastSelectedIndex(std::nullopt);
+        tableDelegate()->setLastSelectedIndex(std::nullopt);
+        ui->scaleSpaceTable->selectionModel()->clearSelection();
+        return true;
     }
 
     return QObject::eventFilter(obj, event);
@@ -1244,7 +1308,7 @@ void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCur
     model->reset();
 
     //auto delegate{ dynamic_cast<ScaleSpaceDelegate*>(ui->scaleSpaceTable->itemDelegate()) };
-    getDelegate()->setLastSelectedIndex(std::nullopt);
+    tableDelegate()->setLastSelectedIndex(std::nullopt);
 
     setWindowTitle(newName + " - " + globals::appName);
 }
@@ -1372,3 +1436,34 @@ void MainWindow::weightFunctionChanged(const int& newFunctionIndex)
     idxOfPrevWeightFunc = ui->weightFuncCombo->currentIndex();
 }
 */
+
+int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)
+{
+    if (baseNoteAdded == 0)
+        baseNoteAdded = scaleSpaceSize;
+
+    auto shiftedNote{ originalNote };
+    auto adjustedRow{ baseNoteAdded };
+
+    while (adjustedRow <= originalNote)
+    {
+        adjustedRow += scaleSpaceSize;
+        ++shiftedNote;
+    }
+
+    return shiftedNote;
+}
+
+int postRemoveNoteShift(int baseNoteRemoved, const int originalNote, const int &scaleSpaceSize)
+{
+    auto shiftedNote{ originalNote };
+    auto adjustedRow{ baseNoteRemoved };
+
+    while (adjustedRow <= originalNote)
+    {
+        adjustedRow += scaleSpaceSize;
+        --shiftedNote;
+    }
+
+    return shiftedNote;
+}
