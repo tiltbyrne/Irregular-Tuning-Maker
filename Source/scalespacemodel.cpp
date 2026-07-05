@@ -149,10 +149,17 @@ void ScaleSpaceModel::setPrecision(const int &newPrecision)
 
 long double ScaleSpaceModel::sizeValue(const int &noteFrom, const int &noteTo) const
 {
-    if (noteFrom >= range || noteTo >= range)
-        return calculateIntervalWeight(scaleSpace->getIntervalSize(noteTo, noteFrom));
+    long double returnValue;
 
-    return cellCache(noteFrom, noteTo).interval.getSize();
+    if (noteFrom >= range || noteTo >= range)
+        returnValue = calculateIntervalWeight(scaleSpace->getIntervalSize(noteTo, noteFrom));
+
+    returnValue = cellCache(noteFrom, noteTo).interval.getSize();
+
+    if (displayMode == DisplayMode::ratio)
+        return returnValue;
+    else
+        return centsFromRatio(returnValue);
 }
 
 QString ScaleSpaceModel::makeValue(int noteFrom, int noteTo) const
