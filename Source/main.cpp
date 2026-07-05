@@ -10,12 +10,7 @@ int main(int argc, char *argv[])
     app.setApplicationDisplayName(globals::appName);
     dbManager::initialise();
 
-    QApplication::setStyle("Fusion");
-
-    QPalette pal = qApp->palette();
-    pal.setColor(QPalette::Highlight, QColor(255, 128, 0));
-    pal.setColor(QPalette::Accent, QColor(255, 128, 0));
-    qApp->setPalette(pal);
+    initialisePalette();
 
     MainWindow w;
 \

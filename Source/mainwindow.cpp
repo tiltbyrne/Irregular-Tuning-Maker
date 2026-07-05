@@ -1467,3 +1467,13 @@ int postRemoveNoteShift(int baseNoteRemoved, const int originalNote, const int &
 
     return shiftedNote;
 }
+
+void initialisePalette()
+{
+    QApplication::setStyle("Fusion");
+
+    QPalette pal = qApp->palette();
+    pal.setColor(QPalette::Highlight, settings::highlight);
+    pal.setColor(QPalette::Accent, settings::highlight);
+    qApp->setPalette(pal);
+}

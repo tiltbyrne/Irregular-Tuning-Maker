@@ -154,5 +154,6 @@ extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSi
 extern bool inputIsValid(const QString& input);
 extern int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize);
 extern int postRemoveNoteShift(int baseNoteRemoved, const int originalNote, const int& scaleSpaceSize);
+extern void initialisePalette();
 
 #endif // MAINWINDOW_H
