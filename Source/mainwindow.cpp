@@ -399,6 +399,7 @@ void MainWindow::initialiseMakeCancelButtons()
 {
     ui->cancelButton->setDisabled(true);
     ui->temperamentBox->installEventFilter(this);
+    ui->temperamentBox->setFixedWidth(ui->temperamentBox->width() + 24);
 
     connect(ui->makeButton,
             &QPushButton::clicked,
@@ -687,12 +688,29 @@ void MainWindow::displayTuning()
             return;
     }
 
-    if (model->getDisplayMode() == DisplayMode::cents)
-        for (const auto& note : currentTuning)
-            ui->temperamentBox->appendPlainText(ldtqs(centsFromRatio(note), settings::precisionMax, false));
-    else
-        for (const auto& note : currentTuning)
-            ui->temperamentBox->appendPlainText(ldtqs(note, settings::precisionMax, false));
+    ui->temperamentBox->appendPlainText("Decimal tuning");
+
+    for (const auto& note : currentTuning)
+    {
+        auto noteText{ ldtqs(note, settings::precisionMax, false) };
+
+        if (!noteText.contains("."))
+            noteText.append(".0");
+
+        ui->temperamentBox->appendPlainText(noteText);
+    }
+
+    ui->temperamentBox->appendPlainText("\nCents tuning");
+
+    for (const auto& note : currentTuning)
+    {
+        auto noteText{ ldtqs(centsFromRatio(note), settings::precisionMax, false) };
+
+        if (!noteText.contains("."))
+            noteText.append(".0");
+
+        ui->temperamentBox->appendPlainText(noteText);
+    }
 
     ui->temperamentBox->verticalScrollBar()->setValue(0);
     ui->temperamentBox->moveCursor(QTextCursor::Start);
@@ -1012,8 +1030,6 @@ void MainWindow::handleChangeDisplay(const DisplayMode &mode)
     {
         model->setDisplayMode(mode);
     }
-
-    displayTuning();
 }
 
 void MainWindow::handleChangeSizeWeight(const IntervalMode &mode)
@@ -1249,6 +1265,21 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             ui->attenuationSlider->setValue(ui->attenuationSlider->value() + 1);
             return true;
         }
+        if (keyEvent->key() == Qt::Key_Escape &&
+            (tableDelegate()->getLastSelectedIndex() != std::nullopt ||
+             ui->scaleSpaceTable->selectionModel()->hasSelection()))
+        {
+            tableDelegate()->setLastSelectedIndex(std::nullopt);
+            ui->scaleSpaceTable->selectionModel()->clearSelection();
+            ui->scaleSpaceTable->setCurrentIndex({});
+            return true;
+        }
+        if (tableDelegate()->getLastSelectedIndex() == std::nullopt &&
+            (keyEvent->key() == Qt::Key_Left ||keyEvent->key() == Qt::Key_Right ||
+             keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down))
+        {
+            return true;
+        }
 
         if (obj == ui->scaleSpaceTable)
         {
@@ -1482,5 +1513,6 @@ void initialisePalette()
     QPalette pal = qApp->palette();
     pal.setColor(QPalette::Highlight, settings::highlight);
     pal.setColor(QPalette::Accent, settings::highlight);
+
     qApp->setPalette(pal);
 }
