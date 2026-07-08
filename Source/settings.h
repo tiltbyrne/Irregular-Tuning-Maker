@@ -40,20 +40,19 @@ const long double epsilon{ std::pow(10.L, - static_cast<long double>(precisionMa
 
 constexpr long double attenuationScaling{ 10 };
 
-constexpr long double cutoffValueExponent{ 20 };
+constexpr long double cutoffValueTuner{ 1 };
 
 const QString customScaleSpaceName{ "Open Custom..." };
 
 const QStringList scaleSpaceNames{ "5edo",
                                    "7edo",
                                    "12edo",
-                                   "Major Scale",
                                    "15edo",
                                    "17edo",
                                    "19edo",
                                    customScaleSpaceName };
 
-const QString scaleSpaceName{ scaleSpaceNames[3] };
+const QString scaleSpaceName{ scaleSpaceNames[2] };
 
 const QColor highlight{255, 128, 0};
 

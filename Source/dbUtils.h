@@ -49,7 +49,7 @@ static std::vector<std::pair<QString, IntervalSizePattern>> initialPatterns()
                               45.L/32.L, 3.L/2.L, 8.L/5.L, 5.L/3.L, 9.L/5.L,
                               15.L/8.L, 2.L})
         },
-        {
+        /*{
             settings::scaleSpaceNames[3],
             {
                 {9.L/8.L, 5.L/4.L, 4.L/3.L, 3.L/2.L, 5.L/3.L, 15.L/8.L, 2.L},
@@ -60,7 +60,7 @@ static std::vector<std::pair<QString, IntervalSizePattern>> initialPatterns()
                 {9.L/8.L, 6.L/5.L},
                 {16.L/15.L}
             }
-        },
+        },*/
         {
             settings::scaleSpaceNames[4],
             edoFromSizeArray({std::pow(2.L, 1.L/15.L), 11.L/10.L, 8.L/7.L, 6.L/5.L, 5.L/4.L,
