@@ -72,11 +72,6 @@ void MainWindow::handleScaleSpaceActivated(QString selection)
         return;
     }
 
-    tableDelegate()->setLastSelectedIndex(std::nullopt);
-    selectedNotes.clear();
-    ui->scaleSpaceTable->selectionModel()->clearSelection();
-    ui->selectionBox->clear();
-
     if (selection == settings::customScaleSpaceName) //opening a custom scale space
     {
         const QFileInfo file{ QFileDialog::getOpenFileName(this,
@@ -226,15 +221,6 @@ void MainWindow::initialiseTable()
             &ScaleSpace::sizeChanged,
             verticalHeader,
             &CustomHeaderView::handleScaleSpaceSizeChanged);
-
-    connect(ui->scaleSpaceTable->selectionModel(),
-            &QItemSelectionModel::selectionChanged,
-            this,
-            [this]()
-            {
-                selectedNotes.clear();
-                updateSaveButtonStates();
-            });
 }
 
 void MainWindow::initialiseWeightFunctionsCombo()
@@ -379,7 +365,7 @@ void MainWindow::handleHeaderLeftClicked(int logicalIndex)
 
     updateSelectionBox();
 
-    updateSaveButtonStates();
+    //updateSaveButtonStates();
 }
 
 void MainWindow::initialiseSaveSubScaleButtons()
@@ -439,19 +425,9 @@ void MainWindow::handleSaveSubScaleSpaceAs()
 
     const auto newDatabase{ dbManager::openDatabase(url) };
 
-    std::vector<int> notesToSave{ selectedNotes };
+    std::vector<int> notes{ notesToSave() };
 
-    if (notesToSave.empty())
-    {
-        const auto range{ ui->rangeSpinBox->value() };
-        notesToSave.reserve(range);
-
-        for (auto note{ 0 }; note != range; ++note)
-            notesToSave.push_back(note);
-    }
-
-    newDatabase->savePattern(
-        scaleSpace.makeSubSizePattern(notesToSave));
+    newDatabase->savePattern(scaleSpace.makeSubSizePattern(notes));
 
     QFileInfo info{ url.toLocalFile() };
 
@@ -487,7 +463,17 @@ void MainWindow::handleMakeClicked()
 void MainWindow::startMaking()
 {
     if (future.isRunning())
-        tuneScaleCancelRequested = true;
+    {
+        ui->cancelButton->click();
+        QMetaObject::invokeMethod(this,
+                                  [this]
+                                  {
+                                      this->startMaking();
+                                  },
+                                  Qt::QueuedConnection);
+
+        return;
+    }
 
     ui->cancelButton->setEnabled(true);
 
@@ -535,7 +521,7 @@ void MainWindow::cancelMaking()
 
     ui->clearButton->setEnabled(true);
 
-    displayTuning();
+    ui->temperamentBox->clear();
 }
 
 void MainWindow::clearTemperamentBox()
@@ -681,12 +667,7 @@ void MainWindow::displayTuning()
     ui->temperamentBox->clear();
 
     if (currentTuning.empty())
-    {
-        if (future.isRunning())
-            ui->temperamentBox->setPlainText("Making tuning...");
-        else
-            return;
-    }
+        return;
 
     ui->temperamentBox->appendPlainText("Decimal tuning");
 
@@ -752,8 +733,12 @@ void MainWindow::handleClearClicked()
 
 void MainWindow::postModelResetSelect(const QModelIndex &index, const std::optional<QModelIndex>& oldIndex)
 {
-    if (index.row() >= model->getRange() && index.column() >= model->getRange())
+    if (index.row() >= model->getRange() || index.column() >= model->getRange())
+    {
+        ui->scaleSpaceTable->selectionModel()->select(index, QItemSelectionModel::Deselect);
+        tableDelegate()->setLastSelectedIndex(std::nullopt);
         return;
+    }
 
     ui->scaleSpaceTable->setFocus();
 
@@ -761,7 +746,7 @@ void MainWindow::postModelResetSelect(const QModelIndex &index, const std::optio
 
     ui->scaleSpaceTable->scrollTo(index);
 
-    ui->scaleSpaceTable->selectionModel()->select(index, QItemSelectionModel::SelectCurrent);
+    ui->scaleSpaceTable->selectionModel()->select(index, QItemSelectionModel::Current);
 
     if (oldIndex.has_value())
         ui->scaleSpaceTable->update(oldIndex.value());
@@ -788,6 +773,30 @@ void MainWindow::updateSelectionBox()
 
         ui->selectionBox->appendPlainText(output);
     }
+}
+
+std::vector<int> MainWindow::notesToSave() const
+{
+    auto notesToSave{ selectedNotes };
+
+    if (notesToSave.empty())
+    {
+        const auto range{ ui->rangeSpinBox->value() };
+        notesToSave.reserve(range);
+
+        for (auto note{ 0 }; note != range; ++note)
+            notesToSave.push_back(note);
+    }
+
+    return notesToSave;
+}
+
+void MainWindow::resetSelection()
+{
+    tableDelegate()->setLastSelectedIndex(std::nullopt);
+
+    ui->scaleSpaceTable->selectionModel()->clearSelection();
+    ui->scaleSpaceTable->setCurrentIndex({});
 }
 
 void MainWindow::handleAddNote(int noteToAdd)
@@ -948,7 +957,6 @@ void MainWindow::handleRangeChanged(const int& range)
 
         updateSelectionBox();
     }
-
 }
 
 void MainWindow::handleAttenuationChanged(int attenuation)
@@ -1192,7 +1200,6 @@ void MainWindow::initialiseSelectionBox()
 void MainWindow::handleCurrentUrlChanged(QUrl newUrl)
 {
     QFileInfo info{ newUrl.toLocalFile() };
-
     ui->saveButton->setEnabled(info.absoluteDir().canonicalPath() != dbUtils::databaseDirectory);
 }
 
@@ -1226,19 +1233,19 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
              keyEvent->key() == Qt::Key_Enter) &&
             keyEvent->modifiers() == Qt::ControlModifier)
         {
-            handleMakeClicked();
+            ui->makeButton->click();
             return true;
         }
         if (keyEvent->key() == Qt::Key_Delete &&
             keyEvent->modifiers() == Qt::ControlModifier)
         {
-            handleCancelClicked();
+            ui->cancelButton->click();
             return true;
         }
         if (keyEvent->key() == Qt::Key_Backspace &&
             keyEvent->modifiers() == Qt::ControlModifier)
         {
-            handleClearClicked();
+            ui->clearButton->click();
             return true;
         }
         if (keyEvent->key() == Qt::Key_Up &&
@@ -1269,9 +1276,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             (tableDelegate()->getLastSelectedIndex() != std::nullopt ||
              ui->scaleSpaceTable->selectionModel()->hasSelection()))
         {
-            tableDelegate()->setLastSelectedIndex(std::nullopt);
-            ui->scaleSpaceTable->selectionModel()->clearSelection();
-            ui->scaleSpaceTable->setCurrentIndex({});
+            resetSelection();
             return true;
         }
         if (tableDelegate()->getLastSelectedIndex() == std::nullopt &&
@@ -1285,23 +1290,59 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         {
             auto idx{ ui->scaleSpaceTable->currentIndex() };
 
-            if (idx.isValid())
+            if (!idx.isValid())
+                return QObject::eventFilter(obj, event);
+
+            if (keyEvent->matches(QKeySequence::Copy))
             {
-                if (keyEvent->matches(QKeySequence::Copy))
-                {
-                    QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
-                    return true;
-                }
-                if (keyEvent->matches(QKeySequence::Paste))
-                {
-                    ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
-                    return true;
-                }
-                if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
-                {
-                    ui->scaleSpaceTable->model()->setData(idx, model->defaultText(), Qt::EditRole);
-                    return true;
-                }
+                QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
+                return true;
+            }
+            if (keyEvent->matches(QKeySequence::Paste))
+            {
+                ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
+            {
+                ui->scaleSpaceTable->model()->setData(idx, model->defaultText(), Qt::EditRole);
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Left &&
+                keyEvent->modifiers() == Qt::ShiftModifier &&
+                tableDelegate()->getLastSelectedIndex() != std::nullopt)
+            {
+                if (idx.column() - scaleSpace.storedSize() >= 0)
+                    postModelResetSelect(model->index(idx.row(), idx.column() - scaleSpace.storedSize()), idx);
+
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Right &&
+                keyEvent->modifiers() == Qt::ShiftModifier &&
+                tableDelegate()->getLastSelectedIndex() != std::nullopt)
+            {
+                if (idx.column() + scaleSpace.storedSize() < model->getRange())
+                    postModelResetSelect(model->index(idx.row(), idx.column() + scaleSpace.storedSize()), idx);
+
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Up &&
+                keyEvent->modifiers() == Qt::ShiftModifier &&
+                tableDelegate()->getLastSelectedIndex() != std::nullopt)
+            {
+                if (idx.row() - scaleSpace.storedSize() >= 0)
+                    postModelResetSelect(model->index(idx.row() - scaleSpace.storedSize(), idx.column()), idx);
+
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Down &&
+                keyEvent->modifiers() == Qt::ShiftModifier &&
+                tableDelegate()->getLastSelectedIndex() != std::nullopt)
+            {
+                if (idx.row() + scaleSpace.storedSize() < model->getRange())
+                    postModelResetSelect(model->index(idx.row() + scaleSpace.storedSize(), idx.column()), idx);
+
+                return true;
             }
         }
     }
@@ -1326,15 +1367,15 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
     return QObject::eventFilter(obj, event);
 }
 
-void MainWindow::changeScaleSpace(const QString& newScaleSpaceName, const QString& newScaleSpaceDirectory)
-{
-
-}
-
 void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase, const bool& shouldAdjustRange)
 {
     if (newDatabase.get() == nullptr)
         return;
+
+    resetSelection();
+
+    selectedNotes.clear();
+    ui->selectionBox->clear();
 
     const auto oldSize{ scaleSpace.storedSize() };
 
@@ -1345,43 +1386,8 @@ void MainWindow::changeTable(const QString& newName, const std::unique_ptr<dbCur
 
     model->reset();
 
-    //auto delegate{ dynamic_cast<ScaleSpaceDelegate*>(ui->scaleSpaceTable->itemDelegate()) };
-    tableDelegate()->setLastSelectedIndex(std::nullopt);
-
     setWindowTitle(newName + " - " + globals::appName);
 }
-
-/*
-QStandardItemModel* MainWindow::currentModel() const
-{
-    switch (intervalMode)
-    {
-    case IntervalMode::size:
-        return sizeModel;
-        break;
-
-    case IntervalMode::weight:
-        return weightModel;
-        break;
-
-    default:
-        return nullptr;
-        break;
-    }
-}
-*/
-
-/*
-extern bool inputIsValid(const QString& input)
-{
-    bool canBeDouble;
-    input.toDouble(&canBeDouble);
-
-    return !(!(canBeDouble || inputCanBeFraction(input)) ||
-           input.isEmpty() ||
-           input.isNull());
-}
-*/
 
 void MainWindow::swapIntervalMode()
 {
@@ -1395,85 +1401,12 @@ void MainWindow::swapDisplayMode()
                                                                        : DisplayMode::ratio);
 }
 
-/*
-long double MainWindow::makeWeightItemValue(const int& noteTo, const int& noteFrom, const int& functionIndex) const
+long double MainWindow::getCutoffValue() const
 {
-    if (ui->weightFuncCombo->itemText(functionIndex) != settings::customWeightFuncName)
-    {
-        const auto midDialValue{ (static_cast<long double>(ui->attenuationSlider->maximum()) -
-                                 static_cast<long double>(ui->attenuationSlider->minimum())) / 2.L };
-
-        const auto exponent{ std::pow(settings::attenuationScaling,
-                                     1 - (ui->attenuationSlider->value() / midDialValue)) };
-
-        return std::pow((weightFunctions.at(functionIndex).second)(scaleSpace.getIntervalSize(noteTo, noteFrom)),
-                 exponent);
-    }
-    else if (noteFrom < cachedPreCustomWeightTable.size() &&
-             noteTo < cachedPreCustomWeightTable.size())
-    {
-        return cachedPreCustomWeightTable[noteFrom][noteTo];
-    }
-
-    return 1;
+    return std::pow(static_cast<long double>(ui->cutoffDial->maximum() - ui->cutoffDial->value()) /
+                    static_cast<long double>(ui->cutoffDial->maximum()),
+                    settings::cutoffValueExponent);
 }
-*/
-
-/*
-QString MainWindow::makeWeightItemText(const int& noteTo, const int& noteFrom, const int& functionIndex) const
-{
-    //qDebug() << "inside makeWeightItemText";
-    return ldtqs(makeWeightItemValue(noteTo, noteFrom, functionIndex),
-                 ui->precisionSpinBox->value(),
-                 true);
-}
-*/
-
-const long double MainWindow::getCutoffValue()
-{
-    const auto value{ ui->cutoffDial->maximum() - ui->cutoffDial->value() };
-
-    const auto coeficient{ 1.L / static_cast<long double>(ui->rangeSpinBox->value()) };
-
-    const auto base{ static_cast<long double>(value) /
-                     static_cast<long double>(ui->cutoffDial->maximum()) };
-
-    const auto exponent{ settings::cutoffValueExponentNumerator /
-                         (std::log(factorial(ui->rangeSpinBox->value() - 2)) + 1) };
-
-    return coeficient * std::pow(base, exponent);
-}
-
-/*
-void MainWindow::weightFunctionChanged(const int& newFunctionIndex)
-{
-    if (ui->weightFuncCombo->currentText() != settings::customWeightFuncName)
-    {
-        ui->attenuationSlider->setEnabled(true);
-        cachedPreCustomWeightTable.clear();
-    }
-    else
-    {
-        ui->attenuationSlider->setEnabled(false);
-
-        cachedPreCustomWeightTable.resize(ui->rangeSpinBox->value());
-
-        for (auto noteFrom{ 0 }; noteFrom != cachedPreCustomWeightTable.size(); ++noteFrom)
-        {
-            cachedPreCustomWeightTable[noteFrom].resize(weightModel->columnCount());
-
-            for (auto noteTo{ 0 }; noteTo != cachedPreCustomWeightTable[noteFrom].size(); ++noteTo)
-            {
-                cachedPreCustomWeightTable[noteFrom][noteTo] = makeWeightItemValue(noteTo, noteFrom, idxOfPrevWeightFunc);
-            }
-        }
-    }
-
-    refreshWeightModel();
-
-    idxOfPrevWeightFunc = ui->weightFuncCombo->currentIndex();
-}
-*/
 
 int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)
 {

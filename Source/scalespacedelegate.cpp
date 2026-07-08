@@ -27,14 +27,10 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
 
     const auto& palette{ QApplication::palette() };
 
-    auto fillColour{ palette.color(QPalette::Mid) };
-    //auto textColour{ palette.color(QPalette::Midlight) };
+    auto fillColour{ palette.color(QPalette::Midlight) };
 
     if ((altBlock && !hovering) || (hovering && !altBlock))
-    {
-        fillColour = fillColour.darker(150);
-        //textColour = palette.color(QPalette::Mid);
-    }
+        fillColour = palette.color(QPalette::Mid);
 
     painter->fillRect(opt.rect, fillColour);
 

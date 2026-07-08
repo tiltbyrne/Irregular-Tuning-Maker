@@ -50,8 +50,6 @@ protected slots:
 
 private slots:
     void handleScaleSpaceActivated(QString scaleSpaceName);
-    //void handleSizeModelItemChanged(QStandardItem* item);
-    //void handleWeightModelItemChanged(QStandardItem* item);
     void handleHeaderLeftClicked(int logicalIndex);
     void handleSaveSubScaleSpace();
     void handleSaveSubScaleSpaceAs();
@@ -81,17 +79,13 @@ private:
     std::vector<long double> currentTuning;
 
     ScaleSpace scaleSpace;
-    //QStandardItemModel* sizeModel;
-    //QStandardItemModel* weightModel;
     ScaleSpaceModel* model;
-    //bool selectionIsSymetric{ false };
     std::vector<int> selectedNotes;
 
     QButtonGroup* displayModeGroup;
     QButtonGroup* sizeWeightModeGroup;
 
     int idxOfPrevWeightFunc{ 0 };
-    //std::vector<std::vector<long double>> cachedPreCustomWeightTable;
 
     bool shouldNotProcessSizeChange{ false };
     bool shouldNotProcessWeightChange{ false };
@@ -102,7 +96,6 @@ private:
     void changeScaleSpace(const QString& newScaleSpaceName, const QString& newScaleSpaceDirectory);
     void changeTable(const QString& newName, const std::unique_ptr<dbCurrnet>& newDatabase, const bool& shouldAdjustRange = true);
 
-    //QStandardItemModel* currentModel() const;
     void swapIntervalMode();
     void swapDisplayMode();
 
@@ -112,7 +105,6 @@ private:
     void setSelectionModelBehaviour();
 
     void initialiseTable();
-    //void populateModels();
     void initialiseWeightFunctionsCombo();
     void initialiseScaleSpacesCombo();
     void initialiseCutoffDial();
@@ -129,7 +121,7 @@ private:
 
     long double intervalSizeAsRatio(const long double& size) const;
 
-    const long double getCutoffValue();
+    long double getCutoffValue() const;
 
     IntervalsPattern makeSubIntervalsPattern(std::vector<int> notes) const;
 
@@ -148,6 +140,10 @@ private:
     ScaleSpaceDelegate* tableDelegate() const;
 
     void updateSelectionBox();
+
+    std::vector<int> notesToSave() const;
+
+    void resetSelection();
 };
 
 extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSize, const int& newScaleSpaceSize);
