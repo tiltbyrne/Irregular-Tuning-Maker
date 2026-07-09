@@ -31,16 +31,16 @@ const auto attenuationMidpoint{ (static_cast<long double>(settings::attenuationR
 
 constexpr int precision{ 4 };
 
-constexpr int maxTableSize{ 4096 };
+constexpr int maxTableSize{ 512 };
 
 constexpr int precisionMax{ globals::longDoubleLimit < 15 ? globals::longDoubleLimit
                                                           : 15 };
 
 const long double epsilon{ std::pow(10.L, - static_cast<long double>(precisionMax)) };
 
-constexpr long double attenuationScaling{ 10 };
+constexpr long double attenuationScaling{ 2 };
 
-constexpr long double cutoffValueTuner{ 1 };
+constexpr long double cutoffValueTuner{ 0.5 };
 
 const QString customScaleSpaceName{ "Open Custom..." };
 

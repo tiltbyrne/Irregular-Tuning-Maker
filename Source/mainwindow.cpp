@@ -521,6 +521,8 @@ void MainWindow::cancelMaking()
 
     ui->clearButton->setEnabled(true);
 
+    ui->makeProgressBar->setValue(0);
+
     ui->temperamentBox->clear();
 }
 
@@ -1406,9 +1408,10 @@ void MainWindow::swapDisplayMode()
 long double MainWindow::getCutoffValue() const
 {
     return std::pow(static_cast<long double>(ui->cutoffDial->maximum() - ui->cutoffDial->value()) /
-                    static_cast<long double>(ui->cutoffDial->maximum()),
-                    std::pow(static_cast<long double>(std::log(notesToSave().size())),
-                             settings::cutoffValueTuner));
+                        static_cast<long double>(ui->cutoffDial->maximum()),
+                    std::pow(static_cast<long double>((settings::maxTableSize + 1) - notesToSave().size()),
+                             settings::cutoffValueTuner)) /
+           notesToSave().size();
 }
 
 int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)
