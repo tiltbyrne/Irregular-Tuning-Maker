@@ -14,6 +14,7 @@
 #include <QScrollBar>
 #include <QLineEdit>
 #include <QApplication>
+#include <QTimer>
 
 #include "weights.h"
 #include "settings.h"
@@ -521,9 +522,9 @@ void MainWindow::cancelMaking()
 
     ui->clearButton->setEnabled(true);
 
-    ui->makeProgressBar->setValue(0);
-
     ui->temperamentBox->clear();
+
+    //ui->makeProgressBar->setValue(0);
 }
 
 void MainWindow::clearTemperamentBox()
@@ -552,6 +553,8 @@ void MainWindow::handleCancelClicked()
     {
         cancelMaking();
     }
+
+    ui->makeProgressBar->setValue(0);
 }
 
 void MainWindow::makingTuningFinished()

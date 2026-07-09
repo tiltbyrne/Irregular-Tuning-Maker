@@ -229,8 +229,10 @@ std::vector<long double> Scale::makeWeightedTuning(std::atomic_bool& cancelation
     {
         tuning.push_back(tuneNote(note, cancelationRequest));
 
-        progressCallback( static_cast<float>(note - 1) * 100.f / static_cast<float>(size()) );
+        progressCallback( static_cast<float>(note) * 100.f / static_cast<float>(size() - 1) );
     }
+
+    progressCallback(!cancelationRequest * 100);
 
     return tuning;
 }
