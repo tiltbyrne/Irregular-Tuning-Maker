@@ -2,7 +2,7 @@
 #define SETTINGS_H
 
 #include <QString>
-#include <QSettings>
+//#include <QSettings>
 #include <QPalette>
 #include "globals.h"
 
@@ -31,7 +31,7 @@ const auto attenuationMidpoint{ (static_cast<long double>(settings::attenuationR
 
 constexpr int precision{ 4 };
 
-constexpr int maxTableSize{ 512 };
+constexpr int maxTableSize{ 11 * 53 + 1 };
 
 constexpr int precisionMax{ globals::longDoubleLimit < 15 ? globals::longDoubleLimit
                                                           : 15 };
@@ -55,7 +55,6 @@ const QStringList scaleSpaceNames{ "5edo",
 const QString scaleSpaceName{ scaleSpaceNames[2] };
 
 const QColor highlight{255, 128, 0};
-
 }
 
 enum class DisplayMode

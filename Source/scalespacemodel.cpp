@@ -52,6 +52,9 @@ QVariant ScaleSpaceModel::data(const QModelIndex &index, int role) const
 
 bool ScaleSpaceModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
+    if (index.row() == index.column())
+        return false;
+
     bool isValid{ false };
     const auto data{ makeDataValue(index, value, role, isValid) };
 
@@ -156,10 +159,17 @@ long double ScaleSpaceModel::sizeValue(const int &noteFrom, const int &noteTo) c
 
     returnValue = cellCache(noteFrom, noteTo).interval.getSize();
 
-    if (displayMode == DisplayMode::ratio)
+    switch (displayMode)
+    {
+    case DisplayMode::ratio:
         return returnValue;
-    else
+        break;
+    case DisplayMode::cents:
         return centsFromRatio(returnValue);
+        break;
+    }
+
+    return 1;
 }
 
 QString ScaleSpaceModel::makeValue(int noteFrom, int noteTo) const
@@ -224,16 +234,8 @@ long double ScaleSpaceModel::makeDataValue(const QModelIndex &index, const QVari
 
     auto returnValue{ canBeFraction ? parseFraction(text) : qstld(text) };
 
-    switch (intervalMode)
-    {
-    case IntervalMode::size:
+    if (intervalMode == IntervalMode::size)
         returnValue = forceEditValueRatio(returnValue);
-        break;
-
-    case IntervalMode::weight:
-        returnValue = std::clamp(returnValue, 0.L, 1.L);
-        break;
-    }
 
     return returnValue;
 }
@@ -330,19 +332,45 @@ void ScaleSpaceModel::setWeightData(const QModelIndex &index, const long double 
     if (weightMode == WeightMode::Deterministic)
         setWeightMode(WeightMode::Arbitrary);
 
-    const auto value{ std::clamp(data, 0.L, 1.L) };
+    auto value{ data };
+    if (value < 0.L)
+        value = 0.L;
 
     const auto row{ index.row() },
                column{ index.column() };
 
-    updateCacheWeight(value, row, column);
-    updateCacheWeight(value, column, row);
+    if (value < 1.L)
+    {
+        updateCacheWeight(value, row, column);
+        updateCacheWeight(value, column, row);
 
-    const auto fromToIdx{ this->index(row, column) },
-               toFromIdx{ this->index(column, row) };
+        const auto fromToIdx{ this->index(row, column) },
+                   toFromIdx{ this->index(column, row) };
 
-    emit dataChanged(fromToIdx, fromToIdx, {Qt::DisplayRole, Qt::EditRole});
-    emit dataChanged(toFromIdx, toFromIdx, {Qt::DisplayRole, Qt::EditRole});
+        emit dataChanged(fromToIdx, fromToIdx, {Qt::DisplayRole, Qt::EditRole});
+        emit dataChanged(toFromIdx, toFromIdx, {Qt::DisplayRole, Qt::EditRole});
+    }
+    else
+    {
+        updateCacheWeight(1.L, row, column);
+        updateCacheWeight(1.L, column, row);
+
+        for (auto noteFrom{ 0 }; noteFrom != range; ++noteFrom)
+            for (auto noteTo{ noteFrom + 1 }; noteTo != range; ++noteTo)
+            {
+                if ((noteFrom == row && noteTo == column) ||
+                    (noteTo == row && noteFrom == column))
+                    continue;
+
+                updateCacheWeight(weightValue(noteFrom, noteTo) / value, noteFrom, noteTo);
+                updateCacheWeight(weightValue(noteTo, noteFrom) / value, noteTo, noteFrom);
+
+                qDebug() << ldtqs(weightValue(noteFrom, noteTo));
+                qDebug() << ldtqs(weightValue(noteTo, noteFrom));
+            }
+
+        emit dataChanged(this->index(0, 0), this->index(range - 1, range - 1), {Qt::DisplayRole, Qt::EditRole});
+    }
 }
 
 void ScaleSpaceModel::updateCache(const int& noteFrom, const int& noteTo) const

@@ -25,19 +25,17 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
 
     const auto altBlock{ itemShouldBeAltColour(index.row(), index.column()) };
 
-    const auto& palette{ QApplication::palette() };
-
-    auto fillColour{ palette.color(QPalette::Midlight) };
+    auto fillColour{ blockColour };
 
     if ((altBlock && !hovering) || (hovering && !altBlock))
-        fillColour = palette.color(QPalette::Mid);
+        fillColour = altBlockColour;
 
     painter->fillRect(opt.rect, fillColour);
 
     if ((opt.state & QStyle::State_HasFocus && opt.state & QStyle::State_Selected) ||
         (lastSelectedIndex.has_value() && index == lastSelectedIndex.value()))
     {
-        QPen pen(palette.color(QPalette::Highlight), 2);
+        QPen pen(highlightColour, 2);
         pen.setJoinStyle(Qt::MiterJoin);
         painter->setPen(pen);
         painter->setBrush(Qt::NoBrush);
@@ -57,9 +55,6 @@ void ScaleSpaceDelegate::paint(QPainter *painter,
 
         setLastSelectedIndex(index);
     }
-
-    //painter->setPen(textColour);
-    //painter->drawText(opt.rect, Qt::AlignLeft | Qt::AlignVCenter, opt.text);
 
     opt.backgroundBrush = Qt::NoBrush;
     opt.state &= ~QStyle::State_MouseOver;
