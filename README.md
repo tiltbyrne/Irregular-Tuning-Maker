@@ -12,6 +12,8 @@ $$g\left( x, p \right) = \begin{cases}
 
 A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.119... ≈ 195.3...\textcent$, and $t_A = 1.675... ≈ 893.0...\textcent \text{*}$.
 
+By comparing the intervals $T(I)$ to $I$ you can see a primary benefit of this way of tuning is that $w(I)$ is inversely proportional to $/text{error} = |T(I)-I|$, how far $T(I)$ is from $I$.
+
 $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2}$
 
 $= \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \cdot f_{N - D} \left( A \right) \right)^2}$
@@ -20,4 +22,4 @@ $f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\rig
 
 $t_D = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \leftarrow C\right)^2} = \sqrt[5]{\left( \frac{9}{8} \cdot \frac{9}{8}^2 \cdot \left(\frac{2}{3} \cdot \frac{5}{3}\right)^2\right)} = 1.119... ≈ 195.3...\textcent$
 
-$t_D$ is calculated similarly.
+$t_A$ is calculated similarly.
