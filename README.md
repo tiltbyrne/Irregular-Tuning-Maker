@@ -14,4 +14,4 @@ A classic instructive example of the type of problem encountered in musical tuni
 
 $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2}$
 $= \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \cdot f_{N - D} \left( A \right) \right)^2}$
-$f_{N - D} \left( A \right) = GM\left(g\left(A, C\right) \cdot g\left(A, D\right)\right)^1$
+$f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\right)^1\right)$
