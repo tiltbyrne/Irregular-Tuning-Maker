@@ -24,7 +24,14 @@ While this clear relationship between scale input and resultant tuning breaks do
 
 $$f_{P}\left( x , w \right) = \displaystyle \prod \limits_{p \in P}{g\left( x, p, w \cdot e_p \right)^{e_p}}$$
 
-Since the exponent of each call to $g$ multiplied by the total weight $w$ is now passed as an additional third argument to $g$, that exponent is explicitly written as $e_p = \frac{\prod \limits_{p \in P}{w\left( p \leftarrow q \right)}}{1}$ for clarity, which is simply an alternative way of writing the geometric mean. Finally,
+Since the exponent of each call to $g$ multiplied by the total weight $w$ is now passed as an additional third argument to $g$, that exponent is explicitly written as $e_p = \frac{\prod \limits_{p \in P}{w\left( p \leftarrow q \right)}}{\sum \limits_{q \in P}{\prod \limits_{q' \in P}{w\left( q \leftarrow q' \right) }}}$ for clarity, which is simply an alternative way of writing the geometric mean. Finally,
+
+$$g\left( x, p, w \right) = \begin{cases}
+  x \leftarrow r, & p = r \text{ or } p = x \text{ or } w < c, \\
+  x \leftarrow p \cdot f_{P - x} \left( p, w \right), & \text{otherwise}.
+\end{cases}$$
+
+The value of $c$ is controlled by the precision dial in the application.
 
 $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2}$
 
