@@ -7,5 +7,5 @@ $P$ contains the possible notes from which we could travel to note $x$ from. $GM
 
 $$T(\omega) = \begin{cases}
   x \leftarrow r, & p = r \text{ or } p = x, \\
-  x \leftarrow p \cdot f_{P - x} \left( p \right), & \text{otherwise}.
+  x \leftarrow p \cdot f_{\left{ P - x \right}} \left( p \right), & \text{otherwise}.
 \end{cases}$$
