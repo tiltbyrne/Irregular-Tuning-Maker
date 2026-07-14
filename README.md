@@ -14,7 +14,7 @@ A classic instructive example of the type of problem encountered in musical tuni
 
 By comparing the intervals $\text{T}(I)$ to $I$ you can see a primary benefit of this way of tuning is that $w(I)$ is inversely proportional to $\text{error} = |\text{T}(I) - I|$, how far $\text{T}(I)$ is from $I$.
 
-| Interval Name  | $I$           | $\text{T}\left(I \right)$ | $w\left(I \right)$ | error |
+| Interval Name  | $I$           | $\text{T}\left(I \right)$ | $w\left(I \right)$ | Error |
 | -------------- | ------------- | ------------------------- | ------------------ | ----- |
 | M-2^nd         | 203.9         | 195.3                     | 1                  | 8.6   |
 | P-5^th         | 702.0         | 697.7                     | 2                  | 4.3   |
@@ -23,6 +23,8 @@ By comparing the intervals $\text{T}(I)$ to $I$ you can see a primary benefit of
 While this clear relationship between scale input and resultant tuning breaks down for scales with more notes, thus making the method sort of black-box-like, it is theoretically capable of tuning any scale. However, the calls to $f$ are recursive, meaning the number of calculation grows exponentially with the number of notes in the scale. In practice, the computational demands of this many calls make tuning impractical, meaning recursion must be halted early. There are many ways you might do this, but the way I have chosen is to stop recursion when the total weight of an interval exceeds a lower cutoff $c$. First, $f$ is changed to take a second argument, which represents the total weight to which an individual interval is raised. Now, $t_n = f_N\left(x, 1\right)$ and
 
 $$f_{P}\left( x , w \right) = \displaystyle \prod \limits_{p \in P}{g\left( x, p, w \cdot e_p \right)^{e_p}}$$
+
+Since the exponent of each call to $g$ multiplied by the total weight $w$ is now passed as an additional third argument to $g$, that exponent is explicitly written as $e_p = \frac{\prod \limits_{p \in P}{w\left( p \leftarrow q \right)}}{1}$ for clarity, which is simply an alternative way of writing the geometric mean. Finally,
 
 $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2}$
 
