@@ -1,5 +1,5 @@
 # Irregular-Tuning-Maker
-This application provides a novel, user-friendly interface with which users can create irregular tunings of any scale. The goal of this approach to tuning is to provide the benefits that come with ad-hoc (as opposed to systematic) tuning solutions, while giving the user tools to be explicit how what they are being ad-hoc. No deep understanding of tuning is required to use this method or application.
+This application provides a novel, user-friendly interface with which users can create irregular tunings of any scale. The goal of this approach to tuning is to provide the benefits that come with ad-hoc tunings (https://www.artoftuning.com/tuning_history), while giving the user tools to be explicit about what they are being ad-hoc. No deep understanding of tuning is required to use this method or application.
 
 User guide: https://youtu.be/deV8IO7XNw8
 
