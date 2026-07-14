@@ -3,6 +3,6 @@ To understand the algorithm which Irregular Tuning Maker uses, begin with a scal
 
 $f_{P} \left( x \right) = GM \left(\displaystyle \prod \limits_{p \in P}{g \left( x, p \right)^{\displaystyle \prod \limits_{q \in P}{w \left( p \leftarrow q \right)}}} \right) $
 
-$P$ contains the possible notes from which we could travel to note $x$ from. $GM$ stands for the geometric mean. The exponent of each base inside the product is itself the product of all intervals’ weights from the notes in $P$ to the note $p$. The sum of exponents whose reciprocal the product is raised to to make this geometric mean is therefore $\displaystyle \sum \limits_{q \in P}{\displaystyle \prod \limits_{q' \in P}{w \left( q \leftarrow q'}}$. The function $g$ is defined as:
+$P$ contains the possible notes from which we could travel to note $x$ from. $GM$ stands for the geometric mean. The exponent of each base inside the product is itself the product of all intervals’ weights from the notes in $P$ to the note $p$. The sum of exponents whose reciprocal the product is raised to to make this geometric mean is therefore $\displaystyle \sum \limits_{q \in P}{\displaystyle \prod \limits_{q' \in P}{w \left( q \leftarrow q' \right) }}$. The function $g$ is defined as:
 
-$ \begin{cases} a,& p_n\notin p-p_n \\ b \right, & \text{otherwise} \end{cases} $
+$\begin{cases} a, & p_n \notin p - p_n \\ b \right, & \text{otherwise} \end{cases}$
