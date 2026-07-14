@@ -10,4 +10,4 @@ $$T(\omega) = \begin{cases}
   x \leftarrow p \cdot f_{P - x} \left( p \right), & \text{otherwise}.
 \end{cases}$$
 
-A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N \left( S \right) = \left( N , D, A, \right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w left( D \leftarrow C \right) = w left( A \leftarrow C \right)$ and $w left( A \leftarrow D \right) = 2$. Let’s work through t_D.
+A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N \left( S \right) = \left( N , D, A, \right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w \left( D \leftarrow C \right) = w left( A \leftarrow C \right)$ and $w left( A \leftarrow D \right) = 2$. Let’s work through t_D.
