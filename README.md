@@ -14,11 +14,11 @@ A classic instructive example of the type of problem encountered in musical tuni
 
 By comparing the intervals $\text{T}(I)$ to $I$ you can see a primary benefit of this way of tuning is that $w(I)$ is inversely proportional to $\text{error} = |\text{T}(I) - I|$, how far $\text{T}(I)$ is from $I$.
 
-| Interval Name  | $I$           | T$\left(I \right)$ | $w\left(I \right)$ | error |
-| -------------- | ------------- | ------------------ | ------------------ | ----- |
-| M-2^nd         | 203.9         | 195.3              | 1                  | 8.6   |
-| P-5^th         | 884.4         | 893.0              | 1                  | 8.6   |
-| M-6^th         | 702.0         | 697.7              | 2                  | 4.3   |
+| Interval Name  | $I$           | $\text{T}\left(I \right)$ | $w\left(I \right)$ | error |
+| -------------- | ------------- | ------------------------- | ------------------ | ----- |
+| M-2^nd         | 203.9         | 195.3                     | 1                  | 8.6   |
+| P-5^th         | 884.4         | 893.0                     | 1                  | 8.6   |
+| M-6^th         | 702.0         | 697.7                     | 2                  | 4.3   |
 
 $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2}$
 
