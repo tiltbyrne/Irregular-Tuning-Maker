@@ -10,10 +10,6 @@ $$g\left( x, p \right) = \begin{cases}
   x \leftarrow p \cdot f_{P - x} \left( p \right), & \text{otherwise}.
 \end{cases}$$
 
-A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.11942... ≈ 195.3\textcent$, and $t_A = 1.67497... ≈ 893.0\textcent$*.
+A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.11942... ≈ 195.3\textcent$, and $t_A = 1.67497... ≈ 893.0\textcent \text{*}$.
 
-* $t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{2}$
-
-g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \ cdot g\left(D, A\right)^2
-
-
+$\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \ cdot g\left(D, A\right)^2}$
