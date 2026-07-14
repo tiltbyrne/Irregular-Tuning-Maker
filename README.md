@@ -17,8 +17,12 @@ By comparing the intervals $\text{T}(I)$ to $I$ you can see a primary benefit of
 | Interval Name  | $I$           | $\text{T}\left(I \right)$ | $w\left(I \right)$ | error |
 | -------------- | ------------- | ------------------------- | ------------------ | ----- |
 | M-2^nd         | 203.9         | 195.3                     | 1                  | 8.6   |
-| P-5^th         | 884.4         | 893.0                     | 1                  | 8.6   |
-| M-6^th         | 702.0         | 697.7                     | 2                  | 4.3   |
+| P-5^th         | 702.0         | 697.7                     | 2                  | 4.3   |
+| M-6^th         | 884.4         | 893.0                     | 1                  | 8.6   |
+
+While this clear relationship between scale input and resultant tuning breaks down for scales with more notes, thus making the method sort of black-box-like, it is theoretically capable of tuning any scale. However, the calls to $f$ are recursive, meaning the number of calculation grows exponentially with the number of notes in the scale. In practice, the computational demands of this many calls make tuning impractical, meaning recursion must be halted early. There are many ways you might do this, but the way I have chosen is to stop recursion when the total weight of an interval exceeds a lower cutoff $c$. First, $f$ is changed to take a second argument, which represents the total weight to which an individual interval is raised. Now, $t_n = f_N\left(x, 1\right)$ and
+
+$$f_{P}\left( x , w \right) = \displaystyle \prod \limits_{p \in P}{g\left( x, p, w \cdot e_p \right)^{e_p}}$$
 
 $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2}$
 
