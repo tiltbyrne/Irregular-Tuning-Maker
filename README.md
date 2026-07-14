@@ -18,4 +18,4 @@ $= \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \
 
 $f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\right)^1\right) = \sqrt[2]{A \leftarrow C^1 \cdot A \leftarrow C^1} = A \leftarrow C$
 
-$t_D = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot \left(D \leftarrow A \leftarrow C\right)^2}$
+$t_D = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \leftarrow C\right)^2}$
