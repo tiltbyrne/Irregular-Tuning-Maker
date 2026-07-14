@@ -16,4 +16,4 @@ $\text{*} t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \
 
 $= \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \cdot f_{N - D} \left( A \right) \right)^2}$
 
-$f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\right)^1\right)$
+$f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\right)^1\right) = \sqrt[2]{A \leftarrow C \cdot A \leftarrow C} = A \leftarrow C$
