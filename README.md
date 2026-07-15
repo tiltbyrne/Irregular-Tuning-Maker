@@ -14,9 +14,9 @@ $$g\left( x, p \right) = \begin{cases}
   x \leftarrow p \cdot f_{P - x} \left( p \right), & \text{otherwise}.
 \end{cases}$$
 
-A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.119... ≈ 195.3...\textcent$, and $t_A = 1.675... ≈ 893.0...\textcent$[^1].
+A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.119\ldots ≈ 195.3\ldots\textcent$, and $t_A = 1.675\ldots ≈ 893.0\ldots\textcent$[^1].
 
-By comparing the intervals $\mathrm{T}(I)$ to $I$ you can see a primary benefit of this way of tuning is that $w(I)$ is inversely proportional to Error $ = |\mathrm{T}(I) - I|$, how far $\mathrm{T}(I)$ is from $I$.
+By comparing the intervals $\mathrm{T}(I)$ to $I$ you can see a primary benefit of this way of tuning is that $w(I)$ is inversely proportional to Error $=$ $|\mathrm{T}(I) - I|$, how far $\mathrm{T}(I)$ is from $I$.
 
 | Interval Name  | $I$           | $\mathrm{T}\left(I \right)$ | $w\left(I \right)$ | Error |
 | -------------- | ------------- | ------------------------- | ------------------ | ----- |
@@ -37,6 +37,6 @@ $$g\left( x, p, w \right) = \begin{cases}
 
 The value of $c$ is controlled by the precision dial in the application.
 
-[^1]: $t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2} = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \cdot f_{N - D} \left( A \right) \right)^2} f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\right)^1\right) = \sqrt[2]{A \leftarrow C^1 \cdot A \leftarrow C^1} = A \leftarrow C t_D = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \leftarrow C\right)^2} = \sqrt[5]{\left( \frac{9}{8} \cdot \frac{9}{8}^2 \cdot \left(\frac{2}{3} \cdot \frac{5}{3}\right)^2\right)} = 1.119... ≈ 195.3...\textcent. $t_A$ is calculated similarly.
+[^1]: $t_D = f_{N}\left( D \right) = GM\left(\displaystyle \prod \limits_{n \in N}{g\left( D, n \right)^{\displaystyle \prod \limits_{q \in N}{w\left( n \leftarrow q \right)}}} \right) = \sqrt[5]{g\left(D, C\right)^1 \cdot g\left(D, D\right)^2 \cdot g\left(D, A\right)^2} = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \cdot f_{N - D} \left( A \right) \right)^2} f_{N - D} \left( A \right) = GM\left(g\left(A, C\right)^1 \cdot g\left(A, D\right)^1\right) = \sqrt[2]{A \leftarrow C^1 \cdot A \leftarrow C^1} = A \leftarrow C t_D = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow A \leftarrow C\right)^2} = \sqrt[5]{\left( \frac{9}{8} \cdot \frac{9}{8}^2 \cdot \left(\frac{2}{3} \cdot \frac{5}{3}\right)^2\right)} = 1.119\ldots. $t_A$ is calculated similarly.
 
 [^2]: This is not the case if all weights are equal because when $w\left(a,b\right) = w\left(b,a\right)$ for any $a$ and $b$, $f_N\left(x \right) = \sqrt[N]{\prod \limits_{n \in N}{x \leftarrow n}}$
