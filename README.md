@@ -14,15 +14,15 @@ $$g\left( x, p \right) = \begin{cases}
   x \leftarrow p \cdot f_{P - x} \left( p \right), & \text{otherwise}.
 \end{cases}$$
 
-A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.119\ldots ≈ 195.3\ldots\textcent$, and $t_A = 1.675\ldots ≈ 893.0\ldots\textcent$[^1].
+A classic instructive example of the type of problem encountered in musical tuning is the three-note scale of $N\left( S \right) = \left(C , D, A\right)$. This scale contains the intervals $D \leftarrow C = \frac{9}{8}$, $A \leftarrow C = \frac{5}{3}$, and $A \leftarrow D = \frac{3}{2}$ which are called the major second, major sixth, and perfect fifth respectively. In this example $r = C$, $w\left( D \leftarrow C \right) = w\left( A \leftarrow C \right) = 1$ and $w\left( A \leftarrow D \right) = 2$. $t_D = 1.119\ldots≈195.3\ldots\textcent$, and $t_A = 1.675\ldots≈893.0\ldots\textcent$[^1].
 
 By comparing the intervals $\mathrm{T}(I)$ to $I$ you can see a primary benefit of this way of tuning is that $w(I)$ is inversely proportional to Error $=$ $|\mathrm{T}(I) - I|$, how far $\mathrm{T}(I)$ is from $I$.
 
 | Interval Name  | $I$           | $\mathrm{T}\left(I \right)$ | $w\left(I \right)$ | Error |
-| -------------- | ------------- | ------------------------- | ------------------ | ----- |
-| Major Second   | 203.9         | 195.3                     | 1                  | 8.6   |
-| Perfect Fifth  | 702.0         | 697.7                     | 2                  | 4.3   |
-| Major Sixth    | 884.4         | 893.0                     | 1                  | 8.6   |
+| -------------- | ------------- | ------------------------- | -------------------- | ----- |
+| Major Second   | 203.9         | 195.3                     | 1                    | 8.6   |
+| Perfect Fifth  | 702.0         | 697.7                     | 2                    | 4.3   |
+| Major Sixth    | 884.4         | 893.0                     | 1                    | 8.6   |
 
 While clear relationships between scale input and resultant tuning breaks down for scales with more notes, thus hampering analysis, it is theoretically capable of tuning any scale. However, the calls to $f$ are recursive, meaning the number of calculation grows exponentially with the number of notes in the scale[^2]. In practice, the computational demands of tuning even a set of notes as little as 24 notes are impractical, meaning recursion must be halted early. There are many ways you might do this, but the way I have chosen is to stop recursion when the total weight of an interval exceeds a lower cutoff $c$. First, $f$ is changed to take a second argument, which represents the total weight to which an individual interval is raised. Now, $t_n = f_N\left(x, 1\right)$ and
 
