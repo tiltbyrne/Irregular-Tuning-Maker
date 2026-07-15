@@ -47,4 +47,4 @@ $t_D = \sqrt[5]{D \leftarrow C^1 \cdot D \leftarrow C^2 \cdot \left(D \leftarrow
 
 $t_A$ is calculated similarly.
 
-2. This is not the case if all weights are equal because when $w\left(a,b\right) = w\left(b,a\right)$ for any $a$ and $b$, $f_N\left(x \right) = \sqrt[N]{\displaystyle \prod \limits_{n \in N}{x \leftarrow n}}$
+2. This is not the case if all weights are equal because when $w\left(a,b\right) = w\left(b,a\right)$ for any $a$ and $b$, $f_N\left(x \right) = \sqrt[N]{\prod \limits_{n \in N}{x \leftarrow n}}$
