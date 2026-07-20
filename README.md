@@ -1,7 +1,7 @@
 # Irregular-Tuning-Maker
 This application provides a novel, user-friendly interface with which users can create irregular tunings of any scale. The goal of this approach to tuning is to provide the benefits that come with ad-hoc tunings, while giving the user tools to be explicit about what they are being ad-hoc. No deep understanding of tuning is required to use this method or application.
 
-![image alt]([https://github.com/tiltbyrne/Irregular-Tuning-Maker/blob/main/Screenshot%202026-07-21%20012342.png?raw=true](https://github.com/tiltbyrne/Irregular-Tuning-Maker/blob/9ef788dd7ae9f4caf6298802d383ab80da9264e2/READMEimage.png))
+![image alt](https://github.com/tiltbyrne/Irregular-Tuning-Maker/blob/main/READMEimage.png?raw=true)
 
 User guide: https://youtu.be/deV8IO7XNw8
 
