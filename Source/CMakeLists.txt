@@ -9,6 +9,8 @@ find_package(Qt6 6.5 REQUIRED COMPONENTS
 
 qt_standard_project_setup()
 
+set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/app.rc")
+
 qt_add_executable(TuningMakerGUI
     WIN32 MACOSX_BUNDLE
 
@@ -38,6 +40,7 @@ qt_add_executable(TuningMakerGUI
 
     customheaderview.h customheaderview.cpp
     customspinbox.h customspinbox.cpp
+    ${APP_ICON_RESOURCE_WINDOWS}
 )
 
 qt_add_resources(TuningMakerGUI "app_resources"

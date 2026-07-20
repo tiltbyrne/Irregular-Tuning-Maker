@@ -164,12 +164,17 @@ long double ScaleSpaceModel::sizeValue(const int &noteFrom, const int &noteTo) c
     case DisplayMode::ratio:
         return returnValue;
         break;
+
     case DisplayMode::cents:
         return centsFromRatio(returnValue);
         break;
+
+    default:
+        returnValue = 1;
+        break;
     }
 
-    return 1;
+    return returnValue;
 }
 
 QString ScaleSpaceModel::makeValue(int noteFrom, int noteTo) const
@@ -364,9 +369,6 @@ void ScaleSpaceModel::setWeightData(const QModelIndex &index, const long double 
 
                 updateCacheWeight(weightValue(noteFrom, noteTo) / value, noteFrom, noteTo);
                 updateCacheWeight(weightValue(noteTo, noteFrom) / value, noteTo, noteFrom);
-
-                qDebug() << ldtqs(weightValue(noteFrom, noteTo));
-                qDebug() << ldtqs(weightValue(noteTo, noteFrom));
             }
 
         emit dataChanged(this->index(0, 0), this->index(range - 1, range - 1), {Qt::DisplayRole, Qt::EditRole});
@@ -518,6 +520,8 @@ long double ScaleSpaceModel::currentValue(const int &noteFrom, const int &noteTo
         return weightValue(noteFrom, noteTo);
         break;
     }
+
+    return 1;
 }
 
 QString ScaleSpaceModel::weightText(long double intervalWeight) const
@@ -613,8 +617,11 @@ QString ScaleSpaceModel::defaultText() const
     case IntervalMode::size:
         return displayMode == DisplayMode::ratio ? "1" : "0";
         break;
+
     case IntervalMode::weight:
         return "1";
         break;
     }
+
+    return "";
 }
