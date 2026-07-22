@@ -45,8 +45,6 @@ bool Scale::unweighted() const
 void Scale::setWeightCutoff(long double newWeightCutoff)
 {    
     weightCutoff = std::clamp(newWeightCutoff, 0.L, 1.L);
-
-    //emit cutoffUpdated(newWeightCutoff);
 }
 
 void Scale::setUnweighted(bool shouldBeUnweighted)

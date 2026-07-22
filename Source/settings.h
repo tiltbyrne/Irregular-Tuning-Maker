@@ -27,8 +27,6 @@ const std::pair<int, int> attenuationRange{0, 100};
 const auto attenuationMidpoint{ (static_cast<long double>(settings::attenuationRange.second) -
                                  static_cast<long double>(settings::attenuationRange.first)) / 2.L };
 
-//constexpr int range{ 6 };
-
 constexpr int precision{ 4 };
 
 constexpr int maxTableSize{ 11 * 53 + 1 };
@@ -50,6 +48,7 @@ const QStringList scaleSpaceNames{ "5edo",
                                    "15edo",
                                    "17edo",
                                    "19edo",
+                                   "22edo",
                                    customScaleSpaceName };
 
 const QString scaleSpaceName{ scaleSpaceNames[2] };
