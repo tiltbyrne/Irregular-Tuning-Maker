@@ -11,11 +11,13 @@ CustomHeaderView::CustomHeaderView(int initialSize,
     , addAfter(contextMenu->addAction("Insert After"))
     , addBefore(contextMenu->addAction("Insert Before"))
     , delNote(contextMenu->addAction("Delete"))
-    , clear(contextMenu->addAction("Clear Selections"))
+    , fill(contextMenu->addAction("Fill Selection"))
+    , clear(contextMenu->addAction("Clear Selection"))
 {
     addAfter->setObjectName("addAfter");
     addBefore->setObjectName("addBefore");
     delNote->setObjectName("delNote");
+    fill->setObjectName("fill");
     clear->setObjectName("clear");
 }
 
@@ -52,6 +54,10 @@ void CustomHeaderView::contextMenuEvent(QContextMenuEvent *event)
     {
         emit deleteNote(note);
     }
+    else if(chosen == fill)
+    {
+        emit fillSelection();
+    }
     else if(chosen == clear)
     {
         emit clearSelection();
@@ -73,6 +79,10 @@ void CustomHeaderView::enableAction(const QString& actionName, const bool& shoul
     else if(actionName == delNote->objectName())
     {
         delNote->setEnabled(shouldBeEnabled);
+    }
+    else if(actionName == fill->objectName())
+    {
+        fill->setEnabled(shouldBeEnabled);
     }
     else if(actionName == clear->objectName())
     {

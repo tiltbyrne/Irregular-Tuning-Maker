@@ -22,6 +22,7 @@ signals:
     void leftClicked(int note);
     void addNote(int noteToAdd);
     void deleteNote(int noteToDelete);
+    void fillSelection();
     void clearSelection();
 
 protected:
@@ -33,6 +34,7 @@ private:
     QAction* addAfter;
     QAction* addBefore;
     QAction* delNote;
+    QAction* fill;
     QAction* clear;
 
     int scaleSpaceSize;
