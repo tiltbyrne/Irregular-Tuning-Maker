@@ -48,6 +48,8 @@ protected slots:
     // deletes note at index noteToDelete to the scale space and informs selectedNotes, model, and range
     void handleDeleteNote(int noteToDelete);
 
+    void handleFillSelection();
+
     // sets currentUrl to newUrl and informs saveButton
     void handleCurrentUrlChanged(QUrl newUrl);
 
