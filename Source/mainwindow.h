@@ -43,7 +43,7 @@ signals:
 
 protected slots:
     // adds note at index noteToAdd to the scale space and informs selectedNotes, model, and range
-    void handleAddNote(int noteToAdd);
+    void handleAddNote(int noteToAdd, bool cameFromAddBefore);
 
     // deletes note at index noteToDelete to the scale space and informs selectedNotes, model, and range
     void handleDeleteNote(int noteToDelete);

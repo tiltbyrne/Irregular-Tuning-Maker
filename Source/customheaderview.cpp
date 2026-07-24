@@ -2,11 +2,9 @@
 
 #include <QMouseEvent>
 
-CustomHeaderView::CustomHeaderView(int initialSize,
-                                   Qt::Orientation orientation,
+CustomHeaderView::CustomHeaderView(Qt::Orientation orientation,
                                    QWidget *parent)
-    : scaleSpaceSize(initialSize)
-    , QHeaderView(orientation, parent)
+    : QHeaderView(orientation, parent)
     , contextMenu(new QMenu(this))
     , addAfter(contextMenu->addAction("Insert After"))
     , addBefore(contextMenu->addAction("Insert Before"))
@@ -35,7 +33,7 @@ void CustomHeaderView::contextMenuEvent(QContextMenuEvent *event)
 {
     const auto note{ logicalIndexAt(event->pos()) };
 
-    addBefore->setEnabled(note % (scaleSpaceSize - 1) != 0);
+    //addBefore->setEnabled(note % (scaleSpaceSize - 1) != 0);
 
     if (note < 0)
         return;
@@ -48,7 +46,7 @@ void CustomHeaderView::contextMenuEvent(QContextMenuEvent *event)
     }
     else if (chosen == addBefore)
     {
-        emit addNote(note);
+        emit addNote(note, true);
     }
     else if(chosen == delNote)
     {
@@ -88,9 +86,4 @@ void CustomHeaderView::enableAction(const QString& actionName, const bool& shoul
     {
         clear->setEnabled(shouldBeEnabled);
     }
-}
-
-void CustomHeaderView::handleScaleSpaceSizeChanged(int newSize)
-{
-    scaleSpaceSize = newSize;
 }

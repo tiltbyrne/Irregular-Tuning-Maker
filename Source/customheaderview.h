@@ -10,17 +10,15 @@ class CustomHeaderView : public QHeaderView
 {
     Q_OBJECT
 public:
-    explicit CustomHeaderView(int initialSize,
-                              Qt::Orientation orientation,
+    explicit CustomHeaderView(Qt::Orientation orientation,
                               QWidget *parent = nullptr);
 
 public slots:
     void enableAction(const QString& actionName, const bool& shouldBeEnabled = true);
-    void handleScaleSpaceSizeChanged(int newSize);
 
 signals:
     void leftClicked(int note);
-    void addNote(int noteToAdd);
+    void addNote(int noteToAdd, bool cameFromAddBefore = false);
     void deleteNote(int noteToDelete);
     void fillSelection();
     void clearSelection();
@@ -36,8 +34,6 @@ private:
     QAction* delNote;
     QAction* fill;
     QAction* clear;
-
-    int scaleSpaceSize;
 };
 
 #endif // CUSTOMHEADERVIEW_H

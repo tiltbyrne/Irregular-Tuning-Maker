@@ -128,16 +128,12 @@ void MainWindow::initialiseTable()
 
     ui->scaleSpaceTable->viewport()->setMouseTracking(true);
 
-    auto* horizontalHeader{ new CustomHeaderView(scaleSpace.size(),
-                                                 Qt::Horizontal,
-                                                 ui->scaleSpaceTable) };
+    auto* horizontalHeader{ new CustomHeaderView(Qt::Horizontal, ui->scaleSpaceTable) };
 
     ui->scaleSpaceTable->setHorizontalHeader(horizontalHeader);
     ui->scaleSpaceTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
-    auto* verticalHeader{ new CustomHeaderView(scaleSpace.size(),
-                                               Qt::Vertical,
-                                               ui->scaleSpaceTable) };
+    auto* verticalHeader{ new CustomHeaderView(Qt::Vertical, ui->scaleSpaceTable) };
 
     ui->scaleSpaceTable->setVerticalHeader(verticalHeader);
     ui->scaleSpaceTable->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -146,27 +142,12 @@ void MainWindow::initialiseTable()
     ui->scaleSpaceTable->setFocusPolicy(Qt::ClickFocus);
 
     connect(&scaleSpace,
-            &ScaleSpace::sizeChanged,
-            horizontalHeader,
-            &CustomHeaderView::handleScaleSpaceSizeChanged);
-
-    connect(&scaleSpace,
-            &ScaleSpace::sizeChanged,
-            horizontalHeader,
-            &CustomHeaderView::handleScaleSpaceSizeChanged);
-
-    connect(&scaleSpace,
             &ScaleSpace::spaceTooSmall,
             horizontalHeader,
             [horizontalHeader](auto isTooSmall)
             {
                 horizontalHeader->enableAction("delNote", !isTooSmall);
             });
-
-    connect(&scaleSpace,
-            &ScaleSpace::sizeChanged,
-            verticalHeader,
-            &CustomHeaderView::handleScaleSpaceSizeChanged);
     // --------------------------------------------------------------------------------------------
 
     // header setup--------------------------------------------------------------------------------
@@ -795,11 +776,13 @@ void MainWindow::resetSelection()
     ui->scaleSpaceTable->setCurrentIndex({});
 }
 
-void MainWindow::handleAddNote(int noteToAdd)
+void MainWindow::handleAddNote(int noteToAdd, bool cameFromAddBefore)
 {
     const auto initialSize{ scaleSpace.storedSize() };
 
-    scaleSpace.addNote(noteToAdd);
+    scaleSpace.addNote(noteToAdd,
+                       {},
+                       cameFromAddBefore && noteToAdd % initialSize == 0);
 
     ui->rangeSpinBox->setValue(makeAdjustedRange(ui->rangeSpinBox->value(),
                                                  initialSize,

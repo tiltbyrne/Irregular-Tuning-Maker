@@ -131,17 +131,25 @@ IntervalSizePattern ScaleSpace::makeSubSizePattern(std::vector<int> notes) const
     return subScaleSpace;
 }
 
-void ScaleSpace::addNote(int note, std::vector<long double> sizes)
+void ScaleSpace::addNote(int note, std::vector<long double> sizes, bool addedNoteIsrepetition)
 {
     const auto preInsertionSize{ size() };
 
-    note %= size() - 1;
+    if (addedNoteIsrepetition)
+        note = 0;
 
-    if (note == 0)
-        note = size() - 1;
+    if (note != 0 && note % (preInsertionSize - 1) == 0)
+        note = preInsertionSize - 1;
+    else
+        note %= preInsertionSize - 1;
 
     if (sizes.size() != preInsertionSize)
+    {
         sizes.resize(preInsertionSize, 1.L);
+
+        if (note == 0)
+            sizes.back() = repetitionIntervalSize();
+    }
 
     for (auto noteFrom{ 0 }; noteFrom < note; ++noteFrom)
         sizePattern[noteFrom].insert(sizePattern[noteFrom].begin() + note - noteFrom - 1,

@@ -52,7 +52,7 @@ public:
 
     IntervalSizePattern makeSubSizePattern(std::vector<int> notes) const;
 
-    void addNote(int note, std::vector<long double> sizes = {});
+    void addNote(int note, std::vector<long double> sizes = {}, bool addedNoteIsrepetition = false);
 
     void removeNote(int note);
 
