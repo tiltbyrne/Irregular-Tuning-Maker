@@ -40,7 +40,7 @@ constexpr long double attenuationScaling{ 2 };
 
 constexpr long double cutoffValueTuner{ 0.5 };
 
-const QString customScaleSpaceName{ "Open Custom..." };
+const QString customScaleSpaceName{ "Custom..." };
 
 const QStringList scaleSpaceNames{ "5edo",
                                    "7edo",

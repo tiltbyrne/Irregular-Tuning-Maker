@@ -1071,6 +1071,66 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
     if (event->type() == QEvent::KeyPress)
     {
+        if (obj == ui->scaleSpaceTable)
+        {
+            auto idx{ ui->scaleSpaceTable->currentIndex() };
+
+            if (!idx.isValid())
+                return QObject::eventFilter(obj, event);
+
+            if (keyEvent->matches(QKeySequence::Copy))
+            {
+                QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
+                return true;
+            }
+            if (keyEvent->matches(QKeySequence::Paste))
+            {
+                ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
+            {
+                ui->scaleSpaceTable->model()->setData(idx, model->defaultText(), Qt::EditRole);
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Left &&
+                keyEvent->modifiers() == Qt::ShiftModifier)
+            {
+                if (idx.column() - scaleSpace.storedSize() >= 0 &&
+                    tableDelegate()->getLastSelectedIndex() != std::nullopt)
+                    postModelResetSelect(model->index(idx.row(), idx.column() - scaleSpace.storedSize()), idx);
+
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Right &&
+                keyEvent->modifiers() == Qt::ShiftModifier)
+            {
+                if (idx.column() + scaleSpace.storedSize() < model->getRange() &&
+                    tableDelegate()->getLastSelectedIndex() != std::nullopt)
+                    postModelResetSelect(model->index(idx.row(), idx.column() + scaleSpace.storedSize()), idx);
+
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Up &&
+                keyEvent->modifiers() == Qt::ShiftModifier)
+            {
+                if (idx.row() - scaleSpace.storedSize() >= 0 &&
+                    tableDelegate()->getLastSelectedIndex() != std::nullopt)
+                    postModelResetSelect(model->index(idx.row() - scaleSpace.storedSize(), idx.column()), idx);
+
+                return true;
+            }
+            if (keyEvent->key() == Qt::Key_Down &&
+                keyEvent->modifiers() == Qt::ShiftModifier)
+            {
+                if (idx.row() + scaleSpace.storedSize() < model->getRange() &&
+                    tableDelegate()->getLastSelectedIndex() != std::nullopt)
+                    postModelResetSelect(model->index(idx.row() + scaleSpace.storedSize(), idx.column()), idx);
+
+                return true;
+            }
+        }
+
         if (keyEvent->key() == Qt::Key_Tab)
         {
             swapDisplayMode();
@@ -1175,66 +1235,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             (keyEvent->key() == Qt::Key_Left ||keyEvent->key() == Qt::Key_Right ||
              keyEvent->key() == Qt::Key_Up || keyEvent->key() == Qt::Key_Down))
         {
-            return true;
-        }
-    }
-
-    if (obj == ui->scaleSpaceTable)
-    {
-        auto idx{ ui->scaleSpaceTable->currentIndex() };
-
-        if (!idx.isValid())
-            return QObject::eventFilter(obj, event);
-
-        if (keyEvent->matches(QKeySequence::Copy))
-        {
-            QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
-            return true;
-        }
-        if (keyEvent->matches(QKeySequence::Paste))
-        {
-            ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
-            return true;
-        }
-        if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
-        {
-            ui->scaleSpaceTable->model()->setData(idx, model->defaultText(), Qt::EditRole);
-            return true;
-        }
-        if (keyEvent->key() == Qt::Key_Left &&
-            keyEvent->modifiers() == Qt::ShiftModifier &&
-            tableDelegate()->getLastSelectedIndex() != std::nullopt)
-        {
-            if (idx.column() - scaleSpace.storedSize() >= 0)
-                postModelResetSelect(model->index(idx.row(), idx.column() - scaleSpace.storedSize()), idx);
-
-            return true;
-        }
-        if (keyEvent->key() == Qt::Key_Right &&
-            keyEvent->modifiers() == Qt::ShiftModifier &&
-            tableDelegate()->getLastSelectedIndex() != std::nullopt)
-        {
-            if (idx.column() + scaleSpace.storedSize() < model->getRange())
-                postModelResetSelect(model->index(idx.row(), idx.column() + scaleSpace.storedSize()), idx);
-
-            return true;
-        }
-        if (keyEvent->key() == Qt::Key_Up &&
-            keyEvent->modifiers() == Qt::ShiftModifier &&
-            tableDelegate()->getLastSelectedIndex() != std::nullopt)
-        {
-            if (idx.row() - scaleSpace.storedSize() >= 0)
-                postModelResetSelect(model->index(idx.row() - scaleSpace.storedSize(), idx.column()), idx);
-
-            return true;
-        }
-        if (keyEvent->key() == Qt::Key_Down &&
-            keyEvent->modifiers() == Qt::ShiftModifier &&
-            tableDelegate()->getLastSelectedIndex() != std::nullopt)
-        {
-            if (idx.row() + scaleSpace.storedSize() < model->getRange())
-                postModelResetSelect(model->index(idx.row() + scaleSpace.storedSize(), idx.column()), idx);
-
             return true;
         }
     }
