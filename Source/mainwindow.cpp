@@ -1303,23 +1303,11 @@ long double MainWindow::makeCutoffValue() const
 {
     const auto dial{ ui->cutoffDial };
 
-    const auto saveSize{ notesToSave().size() };
-
     const auto maximum{ static_cast<long double>(dial->maximum()) };
 
-    const auto normalisedValue{ (maximum - dial->value()) /
-                                 maximum };
-
-                         //this part 'tunes' the shape of the exponent curve
-    const auto exponent{ std::pow(static_cast<long double>(settings::maxTableSize +
-                                                           settings::cutoffValueExpand -
-                                                           saveSize),
-                                  settings::cutoffValueSquash) *
-                         //this part creates the general shape of the exponent curve
-                         logl(1.L / static_cast<long double>(saveSize)) /
-                         logl( static_cast<long double>(dial->singleStep()) / maximum) };
-
-    return std::pow(normalisedValue, exponent);
+    return std::pow((maximum - dial->value()) / maximum,
+                    settings::cutoffValueCurveExponent) /
+            notesToSave().size();
 }
 
 int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)
