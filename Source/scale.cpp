@@ -248,12 +248,10 @@ std::vector<long double> Scale::makeUnWeightedTuning() const
             continue;
 
         for (auto noteFrom{ 0 }; noteFrom != size(); ++noteFrom)
-            tuning[noteTo] *= clampLongDoubleToLimits(
+            tuning[noteTo] *= std::pow(
                 (noteFrom == 0 || noteFrom == noteTo) ? getInterval(noteTo, 0).getSize()
                                                       : getInterval(noteTo, noteFrom).getSize() *
-                                                        getInterval(noteFrom, 0).getSize());
-
-        tuning[noteTo] = std::pow(tuning[noteTo], 1.0 / size());
+                                                        getInterval(noteFrom, 0).getSize(), 1.0 / size());
     }
 
     return tuning;

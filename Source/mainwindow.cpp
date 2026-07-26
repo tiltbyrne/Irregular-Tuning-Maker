@@ -15,6 +15,8 @@
 #include <QApplication>
 #include <QTimer>
 
+#include <cmath>
+
 #include "weights.h"
 #include "settings.h"
 #include "dbManager.h"
@@ -253,7 +255,7 @@ void MainWindow::initialiseScaleSpacesCombo()
 
 void MainWindow::initialiseCutoffDial()
 {
-    ui->cutoffDial->setValue(50);
+    ui->cutoffDial->setValue(ui->cutoffDial->maximum() / 2);
 
     connect(ui->cutoffDial,
             &QDial::actionTriggered,
@@ -464,7 +466,7 @@ void MainWindow::startMaking()
     tuneScaleCancelRequested = false;
 
     const auto notes{ selectedNotes };
-    const auto cutoff{ getCutoffValue() };
+    const auto cutoff{ makeCutoffValue() };
     const auto isUniform{ ui->weightFuncCombo->currentText() == settings::uniformWeightFunctionName};
 
     // safely make thread, this thread actually calculates the tuning
@@ -1297,17 +1299,27 @@ void MainWindow::swapDisplayMode()
                                                                       : DisplayMode::ratio);
 }
 
-long double MainWindow::getCutoffValue() const
+long double MainWindow::makeCutoffValue() const
 {
+    const auto dial{ ui->cutoffDial };
+
     const auto saveSize{ notesToSave().size() };
 
-    const auto normalisedValue{ static_cast<long double>(ui->cutoffDial->maximum() - ui->cutoffDial->value()) /
-                                static_cast<long double>(ui->cutoffDial->maximum()) };
+    const auto maximum{ static_cast<long double>(dial->maximum()) };
 
-    const auto exponent{std::pow(static_cast<long double>((settings::maxTableSize + 1) - saveSize),
-                                 settings::cutoffValueTuner) };
+    const auto normalisedValue{ (maximum - dial->value()) /
+                                 maximum };
 
-    return std::pow(normalisedValue, exponent) / saveSize;
+                         //this part 'tunes' the shape of the exponent curve
+    const auto exponent{ std::pow(static_cast<long double>(settings::maxTableSize +
+                                                           settings::cutoffValueExpand -
+                                                           saveSize),
+                                  settings::cutoffValueSquash) *
+                         //this part creates the general shape of the exponent curve
+                         logl(1.L / static_cast<long double>(saveSize)) /
+                         logl( static_cast<long double>(dial->singleStep()) / maximum) };
+
+    return std::pow(normalisedValue, exponent);
 }
 
 int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)

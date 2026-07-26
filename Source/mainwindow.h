@@ -161,7 +161,7 @@ private:
     void handleClearSelection();
 
     //takes the valu from the dial turns it into a cutoff value for the Scale member object for tuning
-    long double getCutoffValue() const;
+    long double makeCutoffValue() const;
 
     //makes and IntervalPattern contining all intervals from/to the notes in notes which is a subset of the scaleSpace member object
     IntervalsPattern makeSubIntervalsPattern(std::vector<int> notes) const;

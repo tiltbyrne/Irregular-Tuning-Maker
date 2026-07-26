@@ -8,16 +8,13 @@
 
 namespace settings
 {
-//window
-
-//parameters
 constexpr int cutoff{ 50 };
 
 constexpr int weightFunctionsSize{ 2 };
 
 const QString uniformWeightFunctionName{ "Uniform" };
 
-const QStringList weightFunctionNames{ "Inverse Benedetti",
+const QStringList weightFunctionNames{ "Benedetti",
                                        uniformWeightFunctionName };
 
 const QString customWeightFuncName{ "Arbitrary" };
@@ -29,16 +26,18 @@ const auto attenuationMidpoint{ (static_cast<long double>(settings::attenuationR
 
 constexpr int precision{ 4 };
 
-constexpr int maxTableSize{ 11 * 53 + 1 };
+constexpr int maxTableSize{ 1024 };
 
 constexpr int precisionMax{ globals::longDoubleLimit < 15 ? globals::longDoubleLimit
                                                           : 15 };
 
 const long double epsilon{ std::pow(10.L, - static_cast<long double>(precisionMax)) };
 
-constexpr long double attenuationScaling{ 2 };
+constexpr long double attenuationScaling{ 10 };
 
-constexpr long double cutoffValueTuner{ 0.5 };
+constexpr long double cutoffValueSquash{ 0.5 };
+
+constexpr long double cutoffValueExpand{ 10 };
 
 const QString customScaleSpaceName{ "Custom..." };
 
