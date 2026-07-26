@@ -1301,13 +1301,20 @@ void MainWindow::swapDisplayMode()
 
 long double MainWindow::makeCutoffValue() const
 {
-    const auto dial{ ui->cutoffDial };
+    const auto size{ notesToSave().size() };
 
-    const auto maximum{ static_cast<long double>(dial->maximum()) };
+    const auto maximum{ static_cast<long double>(ui->cutoffDial->maximum()) };
 
-    return std::pow((maximum - dial->value()) / maximum,
-                    settings::cutoffValueCurveExponent) /
-            notesToSave().size();
+    const auto maxTableSize{ static_cast<long double>(settings::maxTableSize) };
+
+    const auto exponent{ settings::cutoffValueCurveExponent *
+                         std::pow((maxTableSize - size) / maxTableSize,
+                                   settings::cutoffValueCurveExponent) };
+
+    //9.7656249999999994e-04 seems to be the minimum value at which calculation actually happens
+    //       (for this ^ many digits, for size = 1024)
+
+    return std::pow((maximum - ui->cutoffDial->value()) / maximum, exponent) / size;
 }
 
 int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)

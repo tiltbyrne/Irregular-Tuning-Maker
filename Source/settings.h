@@ -35,7 +35,7 @@ const long double epsilon{ std::pow(10.L, - static_cast<long double>(precisionMa
 
 constexpr long double attenuationScaling{ 10 };
 
-constexpr long double cutoffValueCurveExponent{ 4 };
+constexpr long double cutoffValueCurveExponent{ 20 };
 
 const QString customScaleSpaceName{ "Custom..." };
 
