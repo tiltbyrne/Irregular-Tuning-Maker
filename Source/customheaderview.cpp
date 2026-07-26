@@ -33,8 +33,6 @@ void CustomHeaderView::contextMenuEvent(QContextMenuEvent *event)
 {
     const auto note{ logicalIndexAt(event->pos()) };
 
-    //addBefore->setEnabled(note % (scaleSpaceSize - 1) != 0);
-
     if (note < 0)
         return;
 
