@@ -841,6 +841,11 @@ void MainWindow::handleDeleteNote(int noteToDelete)
 
     auto baseNoteToDelete{ scaleSpace.getBaseNote(noteToDelete) };
 
+    QModelIndex selection;
+
+    if (ui->scaleSpaceTable->selectionModel()->hasSelection())
+        selection = ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0];
+
     scaleSpace.removeNote(noteToDelete);
 
     ui->rangeSpinBox->setValue(postRemoveNoteShift(baseNoteToDelete, model->getRange() - 1, initialSize) + 1);
@@ -854,20 +859,16 @@ void MainWindow::handleDeleteNote(int noteToDelete)
                          } };
 
     // keep selection the same
-    if (const auto selection{ tableDelegate()->getLastSelectedIndex()})
-    {
-        if (!isDeleted(selection->row()) && !isDeleted(selection->column()))
-            postModelResetSelect(model->index(postRemoveNoteShift(baseNoteToDelete,
-                                                                  selection.value().row(),
-                                                                  initialSize),
-                                              postRemoveNoteShift(baseNoteToDelete,
-                                                                  selection.value().column(),
-                                                                  initialSize)),
-                                 selection.value());
-
-        else
-            tableDelegate()->setLastSelectedIndex(std::nullopt);
-    }
+    if (selection.isValid() && !isDeleted(selection.row()) && !isDeleted(selection.column()))
+        postModelResetSelect(model->index(postRemoveNoteShift(baseNoteToDelete,
+                                                              selection.row(),
+                                                              initialSize),
+                                          postRemoveNoteShift(baseNoteToDelete,
+                                                              selection.column(),
+                                                              initialSize)),
+                             selection);
+    else
+        tableDelegate()->setLastSelectedIndex(std::nullopt);
 
     std::vector<int> indeciesToDelete;
     for (auto index{ 0 }; index != selectedNotes.size(); ++index)
