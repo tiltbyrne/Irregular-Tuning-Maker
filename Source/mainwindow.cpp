@@ -782,22 +782,32 @@ void MainWindow::handleAddNote(int noteToAdd, bool cameFromAddBefore)
 {
     const auto initialSize{ scaleSpace.storedSize() };
 
-    scaleSpace.addNote(noteToAdd,
-                       {},
-                       cameFromAddBefore && noteToAdd % initialSize == 0);
+    const auto addedNoteIsRepetition{ cameFromAddBefore && noteToAdd % initialSize == 0 };
 
-    ui->rangeSpinBox->setValue(makeAdjustedRange(ui->rangeSpinBox->value(),
-                                                 initialSize,
-                                                 initialSize + 1));
+    auto baseNoteToAdd{ noteToAdd };
+
+    if (addedNoteIsRepetition)
+        baseNoteToAdd = 0;
+
+    if (baseNoteToAdd != 0 && baseNoteToAdd % initialSize == 0)
+        baseNoteToAdd = initialSize;
+    else
+        baseNoteToAdd %= initialSize;
+
+    ui->rangeSpinBox->setValue(postAddNoteShift(baseNoteToAdd, model->getRange() - 1, initialSize) + 1);
+
+    scaleSpace.addNote(baseNoteToAdd, {});
 
     model->reset();
 
-    auto baseNoteToAdd{ scaleSpace.getBaseNote(noteToAdd) };
-
     // keep selection the same
     if (const auto selection{ tableDelegate()->getLastSelectedIndex()})
-        postModelResetSelect(model->index(postAddNoteShift(baseNoteToAdd, selection.value().row(), initialSize),
-                                          postAddNoteShift(baseNoteToAdd, selection.value().column(), initialSize)),
+        postModelResetSelect(model->index(postAddNoteShift(baseNoteToAdd,
+                                                           selection.value().row(),
+                                                           initialSize),
+                                          postAddNoteShift(baseNoteToAdd,
+                                                           selection.value().column(),
+                                                           initialSize)),
                              selection.value());
 
     // keep selectedNotes the same
@@ -815,9 +825,7 @@ void MainWindow::handleDeleteNote(int noteToDelete)
 
     scaleSpace.removeNote(noteToDelete);
 
-    ui->rangeSpinBox->setValue(makeAdjustedRange(ui->rangeSpinBox->value(),
-                                                 initialSize,
-                                                 initialSize - 1));
+    ui->rangeSpinBox->setValue(postRemoveNoteShift(baseNoteToDelete, model->getRange() - 1, initialSize) + 1);
 
     model->reset();
 
@@ -831,8 +839,12 @@ void MainWindow::handleDeleteNote(int noteToDelete)
     if (const auto selection{ tableDelegate()->getLastSelectedIndex()})
     {
         if (!isDeleted(selection->row()) && !isDeleted(selection->column()))
-            postModelResetSelect(model->index(postRemoveNoteShift(baseNoteToDelete, selection.value().row(), initialSize),
-                                              postRemoveNoteShift(baseNoteToDelete, selection.value().column(), initialSize)),
+            postModelResetSelect(model->index(postRemoveNoteShift(baseNoteToDelete,
+                                                                  selection.value().row(),
+                                                                  initialSize),
+                                              postRemoveNoteShift(baseNoteToDelete,
+                                                                  selection.value().column(),
+                                                                  initialSize)),
                                  selection.value());
 
         else
@@ -1317,13 +1329,10 @@ long double MainWindow::makeCutoffValue() const
     return std::pow((maximum - ui->cutoffDial->value()) / maximum, exponent) / size;
 }
 
-int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize)
+int postAddNoteShift(int baseNoteAdded, int originalNote, const int& scaleSpaceSize)
 {
-    if (baseNoteAdded == 0)
-        baseNoteAdded = scaleSpaceSize;
-
-    auto shiftedNote{ originalNote };
     auto adjustedRow{ baseNoteAdded };
+    auto shiftedNote{ originalNote };
 
     while (adjustedRow <= originalNote)
     {

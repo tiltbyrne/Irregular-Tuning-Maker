@@ -210,7 +210,7 @@ private:
 extern int makeAdjustedRange(const int& currentRange, const int& oldScaleSpaceSize, const int& newScaleSpaceSize);
 
 //fidly helper function to which returns the new index of a note when its added
-extern int postAddNoteShift(int baseNoteAdded, const int originalNote, const int& scaleSpaceSize);
+extern int postAddNoteShift(int baseNoteAdded, int originalNote, const int& scaleSpaceSize);
 
 //fidly helper function to which returns the new index of a note when its removed
 extern int postRemoveNoteShift(int baseNoteRemoved, const int originalNote, const int& scaleSpaceSize);

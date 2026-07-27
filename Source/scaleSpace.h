@@ -52,9 +52,7 @@ public:
 
     IntervalSizePattern makeSubSizePattern(std::vector<int> notes) const;
 
-    //adds a note at the index of note, addedNoteIsrepetition can be set to dispel ambiguity when
-    //note % storedSize() == 0
-    void addNote(int note, std::vector<long double> sizes = {}, bool addedNoteIsrepetition = false);
+    void addNote(int note, std::vector<long double> sizes = {});
 
     void removeNote(int note);
 
