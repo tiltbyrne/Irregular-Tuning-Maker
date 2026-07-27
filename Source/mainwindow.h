@@ -37,6 +37,8 @@ public:
     //must cancel the future and also wait for it to finish
     ~MainWindow();
 
+    void changeScaleSpace(const QString& newFile);
+
 signals:
     // emited whenever the url storing the current scale space changes to newUrl
     void currentUrlChanged(QUrl newUrl);
@@ -49,9 +51,6 @@ protected slots:
     void handleDeleteNote(int noteToDelete);
 
     void handleFillSelection();
-
-    // sets currentUrl to newUrl and informs saveButton
-    void handleCurrentUrlChanged(QUrl newUrl);
 
 private slots:
     //handles begining the process of changing to the scaleSpace that corresponds to itemName, or custom scale chosen
@@ -95,6 +94,9 @@ private slots:
 
     //informs the model of a change in interval mode and resets selection if there is one
     void handleChangeSizeWeight(const IntervalMode& mode);
+
+    // sets currentUrl to newUrl and informs saveButton
+    void handleCurrentUrlChanged(QUrl newUrl);
 
     //this is the only function which liases with the Scale class, begins the process of tuning the scale
     void startMaking();

@@ -7,13 +7,13 @@
 #include <QMessageBox>
 #include <QSpinBox>
 #include <QClipboard>
-#include <QDebug>
 #include <QThread>
 #include <QToolTip>
 #include <QScrollBar>
 #include <QLineEdit>
 #include <QApplication>
-#include <QTimer>
+//#include <QTimer>
+#include <QDir>
 
 #include <cmath>
 
@@ -60,6 +60,22 @@ MainWindow::~MainWindow()
     tuning.waitForFinished();
 
     delete ui;
+}
+
+void MainWindow::changeScaleSpace(const QString &newFile)
+{
+    const auto newUrl{ QUrl::fromLocalFile(newFile) };
+    const auto newDatabase{ dbManager::openDatabase(newUrl) };
+    const QFileInfo info{ newFile };
+
+    emit currentUrlChanged(newUrl);
+    changeDatabase(info.baseName(), newDatabase);
+
+    const auto blocker{ QSignalBlocker(ui->scaleSpaceCombo) };
+
+    ui->scaleSpaceCombo->setCurrentText(
+        dbUtils::isFileInDatabaseDirectory(newUrl) ? info.baseName()
+                                                   : settings::customScaleSpaceName);
 }
 
 void MainWindow::handleScaleSpaceActivated(QString selection)
@@ -281,6 +297,8 @@ void MainWindow::initialiseWindow()
     QApplication::instance()->installEventFilter(this);
     setWindowIcon(QIcon(":/images/icon.png"));
     setWindowTitle(settings::scaleSpaceName + " - " + globals::appName);
+
+    resize(QGuiApplication::primaryScreen()->availableGeometry().size() * 2. / 3.);
 }
 
 void MainWindow::handleHeaderLeftClicked(int logicalIndex)

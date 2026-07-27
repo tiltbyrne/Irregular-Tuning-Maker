@@ -14,6 +14,11 @@ int main(int argc, char *argv[])
 
     MainWindow w;
 \
+    const auto args{ QCoreApplication::arguments() };
+
+    if (args.size() > 1)
+        w.changeScaleSpace(args[1]);
+
     w.show();
 
     return app.exec();

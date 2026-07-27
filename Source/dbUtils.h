@@ -12,7 +12,7 @@
 
 namespace dbUtils
 {
-const auto databaseDirectory{ globals::configPath + "/Pitch Spaces" };
+const QString databaseDirectory{ QDir(globals::configPath).filePath("Pitch Spaces") };
 
 const QString filetypeName{ "itm" };
 
@@ -91,6 +91,31 @@ static std::vector<std::pair<QString, IntervalSizePattern>> initialPatterns()
 inline QString makeUrlString(const QString& name, const QString& directory)
 {
     return { directory + "/" + name + "." + dbUtils::filetypeName };
+}
+
+static bool isFileInDatabaseDirectory(const QUrl &fileUrl)
+{
+    const QFileInfo fileInfo(fileUrl.toLocalFile());
+
+    // Resolve symlinks, "." and ".."
+    const QString canonicalFile{ fileInfo.canonicalFilePath() };
+    const QString canonicalDir{ QDir(databaseDirectory).canonicalPath() };
+
+    if (canonicalFile.isEmpty() || canonicalDir.isEmpty())
+        return false;
+
+    QDir dir = QFileInfo(canonicalFile).dir();
+
+    for (;;)
+    {
+        if (dir == QDir(canonicalDir))
+            return true;
+
+        if (!dir.cdUp())
+            break;
+    }
+
+    return false;
 }
 
 };
