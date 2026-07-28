@@ -1,5 +1,7 @@
 # Irregular-Tuning-Maker
-This application provides a novel, user-friendly interface with which users can create irregular tunings of any scale. The goal of this approach to tuning is to provide the benefits that come with ad-hoc tunings, while giving the user tools to be explicit about what they are being ad-hoc. No deep understanding of tuning is required to use this method or application.
+Irregular Tuning Maker uses a novel algorithm to make tunings of any scale which has quantifiable ideal intervals between notes at any range, referred to as a scale space. Custom scale space files can easily be created and modified from within the app. By internally modelling the space as a weighted graph where edges represent ideal interval sizes and weights the relative importance of their accuracy in the resultant tuning, this program gives the user a high degree of control over the tuning process. Such customisability can be useful when a tuning could conceivably better approximate the ideal size of the intervals it includes with some note-nudging i.e. ad. hoc. tempering. Without a tool like this, it can be difficult to know where to begin, or indeed end, with such note-nudging, as evidenced by the multiplicity of Well Temperaments documented in seventeenth- and eighteenth-century Europe.
+
+To get started, simply select/create a scale space, choose a weight function and range, press make, and a tuning will be created that the algorithm tries to ensure is musical. The degree to which the algorithm ‘tries’ is controlled by the precision dial. Once the calculation is finished, the scale is output in both ratios and cents.
 
 ![image alt](https://github.com/tiltbyrne/Irregular-Tuning-Maker/blob/main/READMEimage.png?raw=true)
 
