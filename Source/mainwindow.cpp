@@ -73,9 +73,10 @@ void MainWindow::changeScaleSpace(const QString &newFile)
 
     const auto blocker{ QSignalBlocker(ui->scaleSpaceCombo) };
 
-    ui->scaleSpaceCombo->setCurrentText(
-        dbUtils::isFileInDatabaseDirectory(newUrl) ? info.baseName()
-                                                   : settings::customScaleSpaceName);
+    const auto fileInDatabaseDirectory{ dbUtils::isFileInDatabaseDirectory(newUrl) };
+
+    ui->scaleSpaceCombo->setCurrentText(fileInDatabaseDirectory ? info.baseName()
+                                                                : settings::customScaleSpaceName);
 }
 
 void MainWindow::handleScaleSpaceActivated(QString selection)
@@ -103,10 +104,7 @@ void MainWindow::handleScaleSpaceActivated(QString selection)
             const auto currentInfo{ currentFileUrl.toLocalFile() };
 
             if (currentInfo != file.filePath()) //file really is new
-            {
-                currentFileUrl = QUrl::fromLocalFile(file.filePath());
-                emit currentUrlChanged(currentFileUrl);
-            }
+                emit currentUrlChanged(QUrl::fromLocalFile(file.filePath()));
 
             changeDatabase(file.baseName(), newDatabase);
 
@@ -122,10 +120,7 @@ void MainWindow::handleScaleSpaceActivated(QString selection)
         const auto file{ QFileInfo(dbUtils::makeUrlString(selection, dbUtils::databaseDirectory)) };
 
         if (currentInfo != file.filePath()) //file really is new
-        {
-            currentFileUrl = QUrl::fromLocalFile(file.filePath());
-            emit currentUrlChanged(currentFileUrl);
-        }
+            emit currentUrlChanged(QUrl::fromLocalFile(file.filePath()));
 
         changeDatabase(selection, newDatabase);
 
@@ -434,9 +429,7 @@ void MainWindow::handleSaveSubScaleSpaceAs()
 
     const auto file{ QFileInfo(dbUtils::makeUrlString(info.baseName(), info.absolutePath())) };
 
-    currentFileUrl = QUrl::fromLocalFile(file.filePath());
-
-    emit currentUrlChanged(currentFileUrl);
+    emit currentUrlChanged(QUrl::fromLocalFile(file.filePath()));
 
     changeDatabase(file.baseName(), newDatabase);
 
@@ -1094,8 +1087,11 @@ void MainWindow::initialiseSelectionBox()
 
 void MainWindow::handleCurrentUrlChanged(QUrl newUrl)
 {
+    currentFileUrl = newUrl;
+
     QFileInfo info{ newUrl.toLocalFile() };
-    ui->saveButton->setEnabled(info.absoluteDir().canonicalPath() != dbUtils::databaseDirectory);
+
+    ui->saveButton->setEnabled(!dbUtils::isFileInDatabaseDirectory(newUrl));
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
