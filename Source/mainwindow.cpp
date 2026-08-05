@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
-#include <QDebug>
+//#include <QDebug>
 #include <QFileDialog>
 #include <QDockWidget>
 #include <QMessageBox>
@@ -12,7 +12,6 @@
 #include <QScrollBar>
 #include <QLineEdit>
 #include <QApplication>
-//#include <QTimer>
 #include <QDir>
 
 #include <cmath>
@@ -1178,6 +1177,11 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
         if (keyEvent->matches(QKeySequence::SaveAs))
         {
             handleSaveSubScaleSpaceAs();
+            return true;
+        }
+        if (keyEvent->matches(QKeySequence::Open))
+        {
+            emit ui->scaleSpaceCombo->textActivated(settings::customScaleSpaceName);
             return true;
         }
         if ((keyEvent->key() == Qt::Key_Return ||
