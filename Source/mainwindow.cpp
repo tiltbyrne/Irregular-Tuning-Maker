@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
-//#include <QDebug>
+#include <QDebug>
 #include <QFileDialog>
 #include <QDockWidget>
 #include <QMessageBox>
@@ -1306,6 +1306,8 @@ void MainWindow::changeDatabase(const QString& newName, const std::unique_ptr<db
     ui->selectionBox->clear();
 
     const auto oldSize{ scaleSpace.storedSize() };
+
+    qDebug() << "new name:" << newName;
 
     scaleSpace.setScaleSpace(newName, newDatabase->loadPattern());
 
