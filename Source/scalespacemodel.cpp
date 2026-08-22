@@ -214,7 +214,7 @@ long double ScaleSpaceModel::makeDataValue(const QModelIndex &index, const QVari
 {
     const auto canBeString{ value.canConvert<QString>() };
 
-    if (!index.isValid() || !canBeString || role != Qt::EditRole)
+    if (!index.isValid() || !canBeString || role != Qt::EditRole || value == QString("inf")) //checking basic string validity
     {
         isValid = false;
         return 1;
@@ -226,10 +226,13 @@ long double ScaleSpaceModel::makeDataValue(const QModelIndex &index, const QVari
         column{ index.column() };
 
     bool canBeDouble{ false };
-    text.toDouble(&canBeDouble);
+    const auto textDouble{ text.toDouble(&canBeDouble) };
     const auto canBeFraction{ inputCanBeFraction(text) };
 
-    if (!(canBeDouble || canBeFraction) || text.trimmed().isEmpty() || row == column)
+    if (!(canBeDouble || canBeFraction) || text.trimmed().isEmpty() || row == column  || // checking numeric stuff
+        (intervalMode == IntervalMode::size &&
+         displayMode == DisplayMode::ratio &&
+         canBeDouble && textDouble == 0.0))
     {
         isValid = false;
         return 1;
@@ -241,6 +244,12 @@ long double ScaleSpaceModel::makeDataValue(const QModelIndex &index, const QVari
 
     if (intervalMode == IntervalMode::size)
         returnValue = forceEditValueRatio(returnValue);
+
+    if (std::isnan(returnValue))
+    {
+        isValid = false;
+        return 1;
+    }
 
     return returnValue;
 }
@@ -382,7 +391,8 @@ void ScaleSpaceModel::updateCache(const int& noteFrom, const int& noteTo) const
 
     const auto intervalSize{ scaleSpace->getIntervalSize(noteTo, noteFrom) };
 
-    const auto intervalWeight{ calculateIntervalWeight(intervalSize) };
+    const auto intervalWeight{ weightMode == WeightMode::Arbitrary ? weightValue(noteFrom, noteTo)
+                                                                   : calculateIntervalWeight(intervalSize) };
 
     cellCache(noteFrom, noteTo) = CellCache(Interval{intervalSize, intervalWeight},
                                             sizeText(intervalSize),
