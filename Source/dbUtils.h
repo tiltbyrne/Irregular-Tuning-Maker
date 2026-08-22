@@ -6,7 +6,6 @@
 #include <QSqlError>
 #include <QStandardPaths>
 #include <QDir>
-#include <QDebug>
 #include "scaleSpace.h"
 #include "settings.h"
 

@@ -1,7 +1,6 @@
 #include "scale.h"
 #include "utilities.h"
 #include <algorithm>
-#include <QDebug>
 
 Scale::Scale(QObject *parent)
 {

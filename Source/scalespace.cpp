@@ -1,6 +1,5 @@
 #include "scaleSpace.h"
 #include "utilities.h"
-#include <QDebug>
 
 ScaleSpace::ScaleSpace(const QString& n, const IntervalSizePattern& s, QObject *parent)
     : name(n)

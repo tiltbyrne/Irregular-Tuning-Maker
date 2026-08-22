@@ -1,7 +1,6 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
-#include <QDebug>
 #include <QFileDialog>
 #include <QDockWidget>
 #include <QMessageBox>
@@ -963,6 +962,7 @@ void MainWindow::handleWeightFuncChanged(const int &index)
             if (ui->weightFuncCombo->itemText(index) == settings::customWeightFuncName)
             {
                 const QSignalBlocker blocker{ model };
+
                 model->setWeightMode(WeightMode::Arbitrary);
             }
             else
@@ -1113,7 +1113,48 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             }
             if (keyEvent->matches(QKeySequence::Paste))
             {
-                ui->scaleSpaceTable->model()->setData(idx, QGuiApplication::clipboard()->text(), Qt::EditRole);
+                const auto text{ QGuiApplication::clipboard()->text() };
+
+                const auto idxRow{ idx.row() },
+                           idxColumn{ idx.column() };
+
+                auto rows{ text.split(QRegularExpression("\r?\n")) };
+
+                if (rows.size() > 0)
+                    rows.resize(rows.size() - 1);
+
+                for (auto row{ 0 }; row < rows.size(); ++row)
+                {
+                    if (row >= model->getRange())
+                        return true;
+
+                    const auto columns{ rows[row].split('\t') };
+
+                    for (auto column{ 0 }; column < columns.size(); ++column)
+                    {
+                        if (column >= model->getRange())
+                            break;
+
+                        const auto value{ columns[column].trimmed() };
+
+                        const auto trueRow{ row + idxRow },
+                                   trueColumn{ column + idxColumn };
+
+                        if (value.isEmpty())
+                            continue;
+
+                        if (trueColumn >= idxRow &&
+                            trueColumn <  idxRow + rows.size() &&
+                            trueRow    >= idxColumn &&
+                            trueRow    <  idxColumn + rows[trueColumn - idxRow].split('\t').size())
+                        {
+                            continue;
+                        }
+
+                        model->setData(model->index(trueRow, trueColumn), value, Qt::EditRole);
+                    }
+                }
+
                 return true;
             }
             if (keyEvent->key() == Qt::Key_Delete || keyEvent->key() == Qt::Key_Backspace)
@@ -1306,8 +1347,6 @@ void MainWindow::changeDatabase(const QString& newName, const std::unique_ptr<db
     ui->selectionBox->clear();
 
     const auto oldSize{ scaleSpace.storedSize() };
-
-    qDebug() << "new name:" << newName;
 
     scaleSpace.setScaleSpace(newName, newDatabase->loadPattern());
 
