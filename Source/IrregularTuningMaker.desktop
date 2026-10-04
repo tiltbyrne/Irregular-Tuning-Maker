@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Irregular Tuning Maker
+Comment=Make irregular tunings of musical scales
+Exec=IrregularTuningMaker
+Icon=IrregularTuningMaker
+Terminal=false
+Categories=Music;
+StartupWMClass=IrregularTuningMaker

@@ -73,6 +73,10 @@ install(TARGETS IrregularTuningMaker
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
+install(FILES IrregularTuningMaker.desktop DESTINATION share/applications)
+
+install(FILES images/icon.png DESTINATION share/icons/hicolor/256x256/apps RENAME IrregularTuningMaker.png)
+
 if(WIN32 OR APPLE)
     qt_generate_deploy_app_script(
         TARGET IrregularTuningMaker
