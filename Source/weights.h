@@ -4,7 +4,7 @@
 #include <functional>
 #include <QString>
 #include "interval.h"
-#include "ScaleSpace.h"
+#include "scaleSpace.h"
 #include "settings.h"
 
 using IntervalsPattern = std::vector<std::vector<Interval>>;

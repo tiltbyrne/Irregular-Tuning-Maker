@@ -402,36 +402,37 @@ void MainWindow::initialiseMakeCancelButtons()
 
 void MainWindow::handleSaveSubScaleSpaceAs()
 {
-    if (!ui->saveAsButton->isEnabled()) //shouldn't have been possible but might happen
+    if (!ui->saveAsButton->isEnabled())
         return;
 
     tableDelegate()->setLastSelectedIndex(std::nullopt);
 
-    const auto url{ QFileDialog::getSaveFileUrl(this,
-                                                "Save File",
-                                                QDir::currentPath(),
-                                                "Scale Spaces (*." + dbUtils::filetypeName + ")") };
+    QFileDialog dialog(this, "Save File", QDir::currentPath());
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setNameFilter("Scale Spaces (*." + dbUtils::filetypeName + ")");
+    dialog.setDefaultSuffix(dbUtils::filetypeName);
 
-    if (!url.isValid() || url.isEmpty() || !dbManager::createDatabase(url))
+    if (dialog.exec() != QDialog::Accepted)
         return;
 
-    // from here we can assume url is ok
+    const auto url{ dialog.selectedUrls().value(0) };
+    if (!url.isValid() || url.isEmpty() || !dbManager::createDatabase(url))
+        return;
 
     const auto newDatabase{ dbManager::openDatabase(url) };
 
     std::vector<int> notes{ notesToSave() };
-
     newDatabase->savePattern(scaleSpace.makeSubSizePattern(notes));
 
-    QFileInfo info{ url.toLocalFile() };
-
+    const QFileInfo info{ url.toLocalFile() };
     const auto file{ QFileInfo(dbUtils::makeUrlString(info.baseName(), info.absolutePath())) };
 
     emit currentUrlChanged(QUrl::fromLocalFile(file.filePath()));
 
     changeDatabase(file.baseName(), newDatabase);
 
-    ui->scaleSpaceCombo->setCurrentIndex(ui->scaleSpaceCombo->findText(settings::customScaleSpaceName));
+    ui->scaleSpaceCombo->setCurrentIndex(
+        ui->scaleSpaceCombo->findText(settings::customScaleSpaceName));
 }
 
 void MainWindow::handleMakeClicked()
