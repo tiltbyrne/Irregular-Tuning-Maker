@@ -9,11 +9,7 @@ void dbManager::initialise()
 
     for (const auto& [name, pattern] : initialPatterns)
     {
-#ifdef Q_OS_WIN
         const QString dbName{ name };
-#else
-        const QString dbName{ name + "." + dbUtils::filetypeName };
-#endif
 
         if (createDatabase(dbName))
             openDatabase(dbName)->savePattern(pattern);

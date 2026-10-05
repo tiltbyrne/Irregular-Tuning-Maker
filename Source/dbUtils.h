@@ -89,7 +89,7 @@ static std::vector<std::pair<QString, IntervalSizePattern>> initialPatterns()
 
 inline QString makeUrlString(const QString& name, const QString& directory)
 {
-    return { directory + "/" + name + "." + dbUtils::filetypeName };
+    return QDir(directory).filePath(name + "." + dbUtils::filetypeName);
 }
 
 static bool isFileInDatabaseDirectory(const QUrl &fileUrl)
