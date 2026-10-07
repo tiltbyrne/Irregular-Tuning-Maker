@@ -6,17 +6,21 @@ CustomHeaderView::CustomHeaderView(Qt::Orientation orientation,
                                    QWidget *parent)
     : QHeaderView(orientation, parent)
     , contextMenu(new QMenu(this))
-    , addAfter(contextMenu->addAction("Insert After"))
-    , addBefore(contextMenu->addAction("Insert Before"))
+    , addAfter(contextMenu->addAction("Insert after"))
+    , addBefore(contextMenu->addAction("Insert before"))
     , delNote(contextMenu->addAction("Delete"))
-    , fill(contextMenu->addAction("Fill Selection"))
-    , clear(contextMenu->addAction("Clear Selection"))
+    , selectAll(contextMenu->addAction("Select all"))
+    , deselectAll(contextMenu->addAction("Deselect all"))
+    , fixAll(contextMenu->addAction("Fix all"))
+    , unfixAll(contextMenu->addAction("Unfix all"))
 {
     addAfter->setObjectName("addAfter");
     addBefore->setObjectName("addBefore");
     delNote->setObjectName("delNote");
-    fill->setObjectName("fill");
-    clear->setObjectName("clear");
+    selectAll->setObjectName("selectAll");
+    deselectAll->setObjectName("deselectAll");
+    fixAll->setObjectName("fixAll");
+    unfixAll->setObjectName("unfixAll");
 }
 
 void CustomHeaderView::mousePressEvent(QMouseEvent *event)
@@ -50,13 +54,21 @@ void CustomHeaderView::contextMenuEvent(QContextMenuEvent *event)
     {
         emit deleteNote(note);
     }
-    else if(chosen == fill)
+    else if(chosen == selectAll)
     {
         emit fillSelection();
     }
-    else if(chosen == clear)
+    else if(chosen == deselectAll)
     {
         emit clearSelection();
+    }
+    else if(chosen == fixAll)
+    {
+        emit fillFixed();
+    }
+    else if(chosen == unfixAll)
+    {
+        emit clearFixed();
     }
 
     event->accept();
@@ -76,12 +88,20 @@ void CustomHeaderView::enableAction(const QString& actionName, const bool& shoul
     {
         delNote->setEnabled(shouldBeEnabled);
     }
-    else if(actionName == fill->objectName())
+    else if(actionName == selectAll->objectName())
     {
-        fill->setEnabled(shouldBeEnabled);
+        selectAll->setEnabled(shouldBeEnabled);
     }
-    else if(actionName == clear->objectName())
+    else if(actionName == deselectAll->objectName())
     {
-        clear->setEnabled(shouldBeEnabled);
+        deselectAll->setEnabled(shouldBeEnabled);
+    }
+    else if(actionName == fixAll->objectName())
+    {
+        fixAll->setEnabled(shouldBeEnabled);
+    }
+    else if(actionName == unfixAll->objectName())
+    {
+        unfixAll->setEnabled(shouldBeEnabled);
     }
 }

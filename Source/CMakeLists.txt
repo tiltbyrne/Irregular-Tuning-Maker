@@ -94,6 +94,8 @@ set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Irregular Tuning Maker application")
 if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}")
+    set_target_properties(IrregularTuningMaker PROPERTIES
+        MACOSX_BUNDLE TRUE)
 
 elseif(UNIX)
     set(CPACK_GENERATOR "DEB")

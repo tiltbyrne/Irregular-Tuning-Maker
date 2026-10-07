@@ -56,6 +56,8 @@ public://-----------------------------------------------------------------------
 
     bool unweighted() const;
 
+    void setFixedNotes(const std::vector<int> &newFixedNotes);
+
 public slots://--------------------------------------------------------------------------------
 
     void expandWeights(const long double& expansionFactor);
@@ -109,6 +111,8 @@ private://----------------------------------------------------------------------
       we only need to store the interval between A and B for any value of A or B.
     */
     IntervalsPattern intervalsPattern;
+
+    std::vector<int> fixedNotes;
 
     /*
       The total weight of an interval tuning a note at which scale traversal will be halted and that interval

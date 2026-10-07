@@ -50,14 +50,24 @@ protected slots:
     // deletes note at index noteToDelete to the scale space and informs selectedNotes, model, and range
     void handleDeleteNote(int noteToDelete);
 
+    // select all notes
     void handleFillSelection();
+
+    //helper function clears selection box and empties selectedNotes
+    void handleClearSelection();
+
+    // fixe all notes
+    void handleFixAll();
+
+    // unfix all notes
+    void handleUnfixAll();
 
 private slots:
     //handles begining the process of changing to the scaleSpace that corresponds to itemName, or custom scale chosen
     void handleScaleSpaceActivated(QString itemName);
 
-    //this just adds the note at logicalIndex to selectedNotes and resets selection if there is one
-    void handleHeaderLeftClicked(int logicalIndex);
+    //this adds clickedNote to selectedNotes or model->fixedNotes
+    void handleHeaderLeftClicked(const int& clickedNote);
 
     //saves sub scale space and resets selection if there is one
     void handleSaveSubScaleSpace();
@@ -138,6 +148,9 @@ private:
     //only these notes will be saved/have a tuning made of them if save/make buttons are pressed, if empty all notes will be saved/made
     std::vector<int> selectedNotes;
 
+    //these notes have an absolute value, which is the interval between themselves and note 0
+    std::vector<int> absoluteNotes;
+
     //radio group for displayMode
     QButtonGroup* displayModeGroup;
 
@@ -159,9 +172,6 @@ private:
     //helper function changes displayMode to whatever it isn't
     void swapDisplayMode();
 
-    //helper function clears selection box and empties selectedNotes
-    void handleClearSelection();
-
     //takes the valu from the dial turns it into a cutoff value for the Scale member object for tuning
     long double makeCutoffValue() const;
 
@@ -176,6 +186,12 @@ private:
 
     //resets the selection onto index
     void postModelResetSelect(const QModelIndex& index, const std::optional<QModelIndex>& oldIndex);
+
+    //adds notes in the vector note to selectedNotes
+    void selectNotes(const std::vector<int>& notes, const bool& select = true);
+
+    //adds notes in the vector note to model->fixedNotes
+    void fixNotes(const std::vector<int>& notes, const bool& fix = true);
 
     //helper function returns the delegate for the scaleSpaceTable
     ScaleSpaceDelegate* tableDelegate() const;

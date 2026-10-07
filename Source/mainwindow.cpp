@@ -185,11 +185,17 @@ void MainWindow::initialiseTable()
     connect(horizontalHeader,
             &CustomHeaderView::clearSelection,
             this,
-            [this]()
-            {
-                selectedNotes.clear();
-                ui->selectionBox->clear();
-            });
+            &MainWindow::handleClearSelection);
+
+    connect(horizontalHeader,
+            &CustomHeaderView::fillFixed,
+            this,
+            &MainWindow::handleFixAll);
+
+    connect(horizontalHeader,
+            &CustomHeaderView::clearFixed,
+            this,
+            &MainWindow::handleUnfixAll);
 
     connect(verticalHeader,
             &CustomHeaderView::leftClicked,
@@ -214,12 +220,12 @@ void MainWindow::initialiseTable()
     connect(verticalHeader,
             &CustomHeaderView::clearSelection,
             this,
-            [this]()
-            {
-                selectedNotes.clear();
-                ui->selectionBox->clear();
-            });
-    // --------------------------------------------------------------------------------------------
+            &MainWindow::handleClearSelection);
+
+    connect(verticalHeader,
+            &CustomHeaderView::clearFixed,
+            this,
+            &MainWindow::handleUnfixAll);
 }
 
 void MainWindow::initialiseWeightFunctionsCombo()
@@ -294,70 +300,55 @@ void MainWindow::initialiseWindow()
     resize(QGuiApplication::primaryScreen()->availableGeometry().size() * 2. / 3.);
 }
 
-void MainWindow::handleHeaderLeftClicked(int logicalIndex)
+void MainWindow::handleHeaderLeftClicked(const int& clickedNote)
 {
-    // adds/removes index to selectedNotes, depending on flag
-    const auto informSelectedNotes{ [this](const int& index, const QItemSelectionModel::SelectionFlag& selectionFlag)
-        {
-            if (selectionFlag == QItemSelectionModel::Select)
-            {
-                const auto itr{ std::find(selectedNotes.begin(), selectedNotes.end(), index) };
-                if (itr == selectedNotes.end())
-                    selectedNotes.push_back(index);
-            }
-            else if (selectionFlag == QItemSelectionModel::Deselect)
-            {
-                const auto itr{ std::remove(selectedNotes.begin(), selectedNotes.end(), index) };
-                if (itr != selectedNotes.end())
-                    selectedNotes.erase(itr, selectedNotes.end());
-            }
-        }};
+    //what type of action should we do - Selection or fixation?
+    enum class ActionType
+    {
+        selection = 0,
+        fixation = 1,
+    };
 
-    // if the index clicked on is not selected, flag is select. Otherwise, flag is deselect
-    auto selectionFlag{ std::find(selectedNotes.begin(), selectedNotes.end(), logicalIndex) != selectedNotes.end()
-                           ? QItemSelectionModel::Deselect
-                           : QItemSelectionModel::Select };
+    const ActionType action{QGuiApplication::keyboardModifiers() & Qt::ShiftModifier
+                                ? ActionType::fixation : ActionType::selection};
 
+
+    //we can't fix/unfix note 0, it is always fixed but the UI cannot make that clear
+    if (action == ActionType::fixation && clickedNote == 0)
+        return;
+
+    //which notes should we apply the action to - just the clicked or all instances of it within the range?
     const auto notesCount{ model->getRange() };
+    const auto baseIndex{ scaleSpace.getBaseNote(clickedNote) };
+    const auto scaleSpaceSize{ scaleSpace.storedSize() };
 
-    auto notesToIterateOver{ selectedNotes };
+    std::vector<int> subjectNotes;
 
-    QItemSelection selections;
-
-     // should select this note in all octaves
     if (QGuiApplication::keyboardModifiers() & Qt::ControlModifier)
     {
-        const auto baseIndex{ scaleSpace.getBaseNote(logicalIndex) };
+        subjectNotes.push_back(baseIndex);
 
-        const auto scaleSpaceSize{ scaleSpace.storedSize() };
-
-        auto repeatedSelection{ baseIndex };
-
-        while (repeatedSelection < notesCount)
-        {
-            notesToIterateOver.push_back(repeatedSelection);
-            repeatedSelection += scaleSpaceSize;
-        }
-
-        auto repeatingIndex{ baseIndex };
-
-        while (repeatingIndex < notesCount)
-        {
-            informSelectedNotes(repeatingIndex, selectionFlag);
-
-            repeatingIndex += scaleSpaceSize;
-        }
+        while (subjectNotes.back() + scaleSpaceSize < notesCount)
+            subjectNotes.push_back(subjectNotes.back() + scaleSpaceSize);
     }
-    else // should only select this note
+    else
     {
-        notesToIterateOver.push_back(logicalIndex);
-
-        informSelectedNotes(logicalIndex, selectionFlag);
+        subjectNotes.push_back(clickedNote);
     }
 
-    std::sort(selectedNotes.begin(), selectedNotes.end());
+    if (action == ActionType::selection)
+    {
+        const auto doAction{selectedNotes.end() == std::find(selectedNotes.begin(), selectedNotes.end(), clickedNote)};
 
-    updateSelectionBox();
+        selectNotes(subjectNotes, doAction);
+    }
+    else //if (action == ActionType::fixation)
+    {
+        const auto fixedNotes{model->getFixedNotes()};
+        const auto doAction{fixedNotes.end() == std::find(fixedNotes.begin(), fixedNotes.end(), clickedNote)};
+
+        fixNotes(subjectNotes, doAction);
+    }
 }
 
 void MainWindow::initialiseSaveSubScaleButtons()
@@ -475,16 +466,27 @@ void MainWindow::startMaking()
 
     tuneScaleCancelRequested = false;
 
-    const auto notes{ selectedNotes };
-    const auto cutoff{ makeCutoffValue() };
-    const auto isUniform{ ui->weightFuncCombo->currentText() == settings::uniformWeightFunctionName};
+    const auto notesToMakeScaleFrom{notesToSave()};
+    std::vector<int> fixedIndices;
+    const auto fixedNotes{model->getFixedNotes()};
 
-    // safely make thread, this thread actually calculates the tuning
-    tuning = QtConcurrent::run([notes, cutoff, isUniform, this]()
+    for (auto index{0}; index != notesToMakeScaleFrom.size(); ++index)
     {
-        Scale scale{ makeSubIntervalsPattern(notes) };
+        if (std::find(fixedNotes.begin(), fixedNotes.end(), notesToMakeScaleFrom[index]) != fixedNotes.end())
+            fixedIndices.push_back(index);
+    }
+
+    const auto cutoff{ makeCutoffValue() };
+    const auto shouldBeUnweighted{ui->weightFuncCombo->currentText() == settings::uniformWeightFunctionName &&
+                                  fixedNotes.empty()};
+
+    // safely make the thread which calculates the tuning
+    tuning = QtConcurrent::run([notesToMakeScaleFrom, fixedIndices, cutoff, shouldBeUnweighted, this]()
+    {
+        Scale scale{ makeSubIntervalsPattern(notesToMakeScaleFrom) };
         scale.setWeightCutoff(cutoff);
-        scale.setUnweighted(isUniform);
+        scale.setUnweighted(shouldBeUnweighted);
+        scale.setFixedNotes(fixedIndices);
 
         return scale.tuneScale(tuneScaleCancelRequested,
                                [this](int progress)
@@ -556,6 +558,45 @@ void MainWindow::handleFillSelection()
         selectedNotes[note] = note;
 
     updateSelectionBox();
+}
+
+void MainWindow::handleClearSelection()
+{
+    selectedNotes.clear();
+    ui->selectionBox->clear();
+}
+
+void MainWindow::handleFixAll()
+{
+    const auto hasSelection{ui->scaleSpaceTable->selectionModel()->hasSelection()};
+    QModelIndex selection;
+    std::optional<QModelIndex> oldSelection;
+
+    auto removedLastSelection{false};
+
+    if (hasSelection)
+    {
+        selection = ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0];
+
+        oldSelection = tableDelegate()->getLastSelectedIndex();
+
+        if (!(oldSelection->row() == 0 || oldSelection->column() == 0))
+        {
+            tableDelegate()->setLastSelectedIndex(std::nullopt);
+
+            removedLastSelection = true;
+        }
+    }
+
+    model->fixAllNotes();
+
+    if (hasSelection && !removedLastSelection)
+        postModelResetSelect(selection, oldSelection);
+}
+
+void MainWindow::handleUnfixAll()
+{
+    model->setFixedNotes({});
 }
 
 void MainWindow::makingTuningFinished()
@@ -741,6 +782,100 @@ void MainWindow::postModelResetSelect(const QModelIndex &index, const std::optio
         ui->scaleSpaceTable->update(oldIndex.value());
 }
 
+void MainWindow::selectNotes(const std::vector<int> &notes, const bool &select)
+{
+    const auto hasSelection{ui->scaleSpaceTable->selectionModel()->hasSelection()};
+    QModelIndex selection;
+    std::optional<QModelIndex> oldSelection;
+
+    if (hasSelection)
+    {
+        selection = ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0];
+
+        oldSelection = tableDelegate()->getLastSelectedIndex();
+    }
+
+    if (select)
+    {
+        for (const auto& note : notes)
+            if (std::find(selectedNotes.begin(), selectedNotes.end(), note) == selectedNotes.end())
+                selectedNotes.push_back(note);
+    }
+    else //if (!select)
+    {
+        for (const auto& note : notes)
+        {
+            const auto itr{std::remove(selectedNotes.begin(), selectedNotes.end(), note)};
+            if (itr != selectedNotes.end())
+                selectedNotes.erase(itr, selectedNotes.end());
+        }
+    }
+
+    std::sort(selectedNotes.begin(), selectedNotes.end());
+
+    updateSelectionBox();
+
+    if (hasSelection)
+        postModelResetSelect(selection, oldSelection);
+}
+
+void MainWindow::fixNotes(const std::vector<int> &notes, const bool &fix)
+{
+    auto fixedNotes{model->getFixedNotes()};
+
+    const auto hasSelection{ui->scaleSpaceTable->selectionModel()->hasSelection()};
+    QModelIndex selection;
+    std::optional<QModelIndex> oldSelection;
+
+    if (hasSelection)
+    {
+        selection = ui->scaleSpaceTable->selectionModel()->selectedIndexes()[0];
+
+        oldSelection = tableDelegate()->getLastSelectedIndex();
+    }
+
+    auto removedLastSelection{false};
+
+    const auto fixedNotesContainsNote{[&fixedNotes](const auto& note)
+        {
+            return std::find(fixedNotes.begin(), fixedNotes.end(), note) == fixedNotes.end();
+        }};
+
+    if (fix)
+    {
+        for (const auto& note : notes)
+        {
+            if (fixedNotesContainsNote(note))
+                fixedNotes.push_back(note);
+
+            const auto lastSelectedIndex{tableDelegate()->getLastSelectedIndex()};
+
+            if (lastSelectedIndex.has_value() &&
+                (lastSelectedIndex->row() == note || lastSelectedIndex->column() == note) &&
+                !(lastSelectedIndex->row() == 0 || lastSelectedIndex->column() == 0))
+            {
+                tableDelegate()->setLastSelectedIndex(std::nullopt);
+
+                removedLastSelection = true;
+            }
+        }
+    }
+    else //if (!fix)
+    {
+        for (const auto& note : notes)
+        {
+            const auto itr{ std::remove(fixedNotes.begin(), fixedNotes.end(), note) };
+            if (itr != fixedNotes.end())
+                fixedNotes.erase(itr, fixedNotes.end());
+        }
+    }
+
+    model->setFixedNotes(fixedNotes);
+
+    if (hasSelection && !removedLastSelection)
+        postModelResetSelect(selection, oldSelection);
+}
+
 ScaleSpaceDelegate* MainWindow::tableDelegate() const
 {
     return dynamic_cast<ScaleSpaceDelegate*>(ui->scaleSpaceTable->itemDelegate());
@@ -825,6 +960,12 @@ void MainWindow::handleAddNote(int noteToAdd, bool cameFromAddBefore)
         note = postAddNoteShift(baseNoteToAdd, note, initialSize);
 
     updateSelectionBox();
+
+    auto fixedNotes{model->getFixedNotes()};
+    for (auto& note : fixedNotes)
+        note = postAddNoteShift(baseNoteToAdd, note, initialSize);
+
+    model->setFixedNotes(fixedNotes);
 }
 
 void MainWindow::handleDeleteNote(int noteToDelete)
@@ -845,10 +986,10 @@ void MainWindow::handleDeleteNote(int noteToDelete)
     model->reset();
 
     // note might be an octave displacement of baseNoteToDelete
-    const auto isDeleted{ [&baseNoteToDelete, &initialSize](const int& note)
+    const auto isDeleted{[&baseNoteToDelete, &initialSize](const int& note)
                          {
                              return ((note - baseNoteToDelete) % initialSize) == 0;
-                         } };
+                         }};
 
     // keep selection the same
     if (selection.isValid() && !isDeleted(selection.row()) && !isDeleted(selection.column()))
@@ -862,22 +1003,40 @@ void MainWindow::handleDeleteNote(int noteToDelete)
     else
         tableDelegate()->setLastSelectedIndex(std::nullopt);
 
-    std::vector<int> indeciesToDelete;
-    for (auto index{ 0 }; index != selectedNotes.size(); ++index)
-    {
-        if (!isDeleted(selectedNotes[index]))
-            selectedNotes[index] = postRemoveNoteShift(baseNoteToDelete,
-                                                       selectedNotes[index],
-                                                       initialSize);
-        else
-            indeciesToDelete.push_back(index - indeciesToDelete.size());
-    }
+    const auto prepareSubjectNotes{[&isDeleted, &baseNoteToDelete, &initialSize](std::vector<int>& subjectNotes)
+        {
+            std::vector<int> notesToDelete;
+
+            for (auto index{ 0 }; index != subjectNotes.size(); ++index)
+            {
+                if (!isDeleted(subjectNotes[index]))
+                    subjectNotes[index] = postRemoveNoteShift(baseNoteToDelete,
+                                                              subjectNotes[index],
+                                                              initialSize);
+                else
+                    notesToDelete.push_back(index - notesToDelete.size());
+            }
+
+            return notesToDelete;
+        }};
 
     // keep selectedNotes the same
-    for (const auto& index : indeciesToDelete)
+    const auto selectionsToDelete{prepareSubjectNotes(selectedNotes)};
+
+    for (const auto& index : selectionsToDelete)
         selectedNotes.erase(selectedNotes.begin() + index);
 
     updateSelectionBox();
+
+    // keep fixedNotes the same
+    auto fixedNotes{model->getFixedNotes()};
+
+    const auto fixedNotesToDelete{prepareSubjectNotes(fixedNotes)};
+
+    for (const auto& index : fixedNotesToDelete)
+        fixedNotes.erase(fixedNotes.begin() + index);
+
+    model->setFixedNotes(fixedNotes);
 }
 
 void MainWindow::initialiseRangeSpinBox()

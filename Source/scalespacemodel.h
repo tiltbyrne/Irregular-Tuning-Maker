@@ -72,6 +72,12 @@ public:
 
     QString defaultText() const;
 
+    std::vector<int> getFixedNotes() const;
+
+    void setFixedNotes(const std::vector<int> &newFixedNotes);
+
+    void fixAllNotes();
+
 signals:
     void weightModeArbitrary();
 
@@ -108,6 +114,8 @@ private:
         QString displaySize;
         QString displayWeight;
     };
+
+    std::vector<int> fixedNotes {0};
 
     using TableCache = std::vector<CellCache>;
     mutable TableCache cache;

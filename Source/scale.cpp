@@ -131,6 +131,16 @@ std::vector<long double> Scale::tuneScale(std::atomic_bool& cancelationRequest,
     return tuning;
 }
 
+void Scale::setFixedNotes(const std::vector<int> &newFixedNotes)
+{
+    fixedNotes.clear();
+    fixedNotes.reserve(newFixedNotes.size());
+
+    for (const auto& note : newFixedNotes)
+        if (note < size() && note != 0)
+            fixedNotes.push_back(note);
+}
+
 long double Scale::prodWeights(const int& noteFrom, const std::vector<int>& notesTo) const
 {
     if (notesTo.empty())
@@ -156,8 +166,11 @@ long double Scale::sumProdWeights(const std::vector<int>& notesFrom) const
 
 long double Scale::tuneNote(int& note, std::atomic_bool& cancelationRequest) const
 {
-    if (cancelationRequest || note == 0)
+    if (cancelationRequest)
         return 1;
+
+    if (note == 0 || std::find(fixedNotes.begin(), fixedNotes.end(), note) != fixedNotes.end())
+        return getInterval(note, 0).getSize();
 
     std::vector<int> nextNotes;
     nextNotes.reserve(size());
@@ -195,7 +208,10 @@ long double Scale::traversePath(const int& currentNoteIndex, const std::vector<i
         const auto nextNote{ possibleNextNotes[nextNoteIndex] };
         const auto exponent{ clampLongDoubleToLimits(prodWeights(nextNote, possibleNextNotes) * reciporicalSumOfProdWeights) };
 
-        const auto intervalSize{ (nextNote == 0 || nextNote == currentNote || exponent * rollingWeight <= weightCutoff)
+        const auto intervalSize{ (nextNote == 0 ||
+                                  std::find(fixedNotes.begin(), fixedNotes.end(), currentNote) != fixedNotes.end() ||
+                                  nextNote == currentNote
+                                | exponent * rollingWeight <= weightCutoff)
                 ? getInterval(currentNote, 0).getSize()
                 : getInterval(currentNote, nextNote).getSize() * traversePath(nextNoteIndex - (currentNoteIndex < nextNoteIndex ? 1 : 0),
                                                                               nextPossibleNextNotes,

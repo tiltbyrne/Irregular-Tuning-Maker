@@ -22,6 +22,8 @@ signals:
     void deleteNote(int noteToDelete);
     void fillSelection();
     void clearSelection();
+    void fillFixed();
+    void clearFixed();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -32,8 +34,10 @@ private:
     QAction* addAfter;
     QAction* addBefore;
     QAction* delNote;
-    QAction* fill;
-    QAction* clear;
+    QAction* selectAll;
+    QAction* deselectAll;
+    QAction* fixAll;
+    QAction* unfixAll;
 };
 
 #endif // CUSTOMHEADERVIEW_H

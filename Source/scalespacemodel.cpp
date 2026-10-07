@@ -75,7 +75,27 @@ bool ScaleSpaceModel::setData(const QModelIndex &index, const QVariant &value, i
 
 Qt::ItemFlags ScaleSpaceModel::flags(const QModelIndex &index) const
 {
-    return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    auto flags{QAbstractTableModel::flags(index) | Qt::ItemIsEditable};
+
+    if (index.row() == index.column())
+    {
+        flags &= ~Qt::ItemIsEnabled;
+        flags &= ~Qt::ItemIsEditable;
+    }
+    else
+        for (const auto& note : fixedNotes)
+        {
+            if ( (index.row() == note || index.column() == note) &&
+                !(index.row() == 0    || index.column() == 0))
+            {
+                flags &= ~Qt::ItemIsEnabled;
+                flags &= ~Qt::ItemIsEditable;
+
+                break;
+            }
+        }
+
+    return flags;
 }
 
 void ScaleSpaceModel::setRange(int newRange)
@@ -86,6 +106,14 @@ void ScaleSpaceModel::setRange(int newRange)
     beginResetModel();
 
     const auto oldRange{ range };
+
+    std::vector<int> newFixedNotes;
+
+    for (const auto& note : fixedNotes)
+        if (note < newRange)
+            newFixedNotes.push_back(note);
+
+    fixedNotes = newFixedNotes;
 
     range = newRange;
 
@@ -634,4 +662,34 @@ QString ScaleSpaceModel::defaultText() const
     }
 
     return "";
+}
+
+std::vector<int> ScaleSpaceModel::getFixedNotes() const
+{
+    return fixedNotes;
+}
+
+void ScaleSpaceModel::setFixedNotes(const std::vector<int> &newFixedNotes)
+{
+    beginResetModel();
+
+    fixedNotes.clear();
+    fixedNotes.reserve(newFixedNotes.size());
+
+    for (const auto& note : newFixedNotes)
+        if (note < range && note != 0)
+            fixedNotes.push_back(note);
+
+    endResetModel();
+}
+
+void ScaleSpaceModel::fixAllNotes()
+{
+    if (range == 1)
+        return;
+
+    fixedNotes.resize(range - 1);
+
+    for (auto note{0}; note != range - 1; ++note)
+        fixedNotes[note] = note + 1;
 }
