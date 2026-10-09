@@ -1506,6 +1506,8 @@ void MainWindow::changeDatabase(const QString& newName, const std::unique_ptr<db
     selectedNotes.clear();
     ui->selectionBox->clear();
 
+    model->setFixedNotes({});
+
     const auto oldSize{ scaleSpace.storedSize() };
 
     scaleSpace.setScaleSpace(newName, newDatabase->loadPattern());
