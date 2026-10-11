@@ -7,6 +7,7 @@ int main(int argc, char *argv[])
     QApplication app(argc, argv);
     app.setApplicationName(globals::appName);
     app.setApplicationDisplayName(globals::appName);
+    app.setDesktopFileName("uk.org.unionz.jamesbyrne");
 
     dbManager::initialise();
 
