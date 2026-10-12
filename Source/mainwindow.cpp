@@ -200,7 +200,7 @@ void MainWindow::initialiseTable()
     connect(horizontalHeader,
             &CustomHeaderView::fixNote,
             this,
-            [this](const int& note)
+            [this, horizontalHeader](const int& note)
             {
                 const auto fixedNotes{model->getFixedNotes()};
                 const auto doAction{fixedNotes.end() == std::find(fixedNotes.begin(), fixedNotes.end(), note)};

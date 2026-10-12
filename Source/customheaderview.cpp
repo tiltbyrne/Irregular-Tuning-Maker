@@ -31,8 +31,11 @@ void CustomHeaderView::mousePressEvent(QMouseEvent *event)
 {
     const auto note{ logicalIndexAt(event->position().toPoint()) };
 
-    if (event->button() == Qt::LeftButton && note >= 0)
+    if (event->button() == Qt::LeftButton)
         emit leftClicked(note);
+
+    if (event->button() == Qt::RightButton)
+        emit enableAction("fix", note != 0);
 
     QHeaderView::mousePressEvent(event);
 }
