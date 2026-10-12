@@ -676,6 +676,8 @@ void ScaleSpaceModel::setFixedNotes(const std::vector<int> &newFixedNotes)
     fixedNotes.clear();
     fixedNotes.reserve(newFixedNotes.size());
 
+
+
     for (const auto& note : newFixedNotes)
         if (note < range && note != 0)
             fixedNotes.push_back(note);

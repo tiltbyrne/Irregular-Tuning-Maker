@@ -20,8 +20,10 @@ signals:
     void leftClicked(int note);
     void addNote(int noteToAdd, bool cameFromAddBefore = false);
     void deleteNote(int noteToDelete);
+    void selectNote(int note);
     void fillSelection();
     void clearSelection();
+    void fixNote(int note);
     void fillFixed();
     void clearFixed();
 
@@ -34,8 +36,10 @@ private:
     QAction* addAfter;
     QAction* addBefore;
     QAction* delNote;
+    QAction* select;
     QAction* selectAll;
     QAction* deselectAll;
+    QAction* fix;
     QAction* fixAll;
     QAction* unfixAll;
 };

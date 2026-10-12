@@ -178,6 +178,16 @@ void MainWindow::initialiseTable()
             &MainWindow::handleDeleteNote);
 
     connect(horizontalHeader,
+            &CustomHeaderView::selectNote,
+            this,
+            [this](const int& note)
+            {
+                const auto doAction{selectedNotes.end() == std::find(selectedNotes.begin(), selectedNotes.end(), note)};
+
+                selectNotes({note}, doAction);
+            });
+
+    connect(horizontalHeader,
             &CustomHeaderView::fillSelection,
             this,
             &MainWindow::handleFillSelection);
@@ -186,6 +196,17 @@ void MainWindow::initialiseTable()
             &CustomHeaderView::clearSelection,
             this,
             &MainWindow::handleClearSelection);
+
+    connect(horizontalHeader,
+            &CustomHeaderView::fixNote,
+            this,
+            [this](const int& note)
+            {
+                const auto fixedNotes{model->getFixedNotes()};
+                const auto doAction{fixedNotes.end() == std::find(fixedNotes.begin(), fixedNotes.end(), note)};
+
+                fixNotes({note}, doAction);
+            });
 
     connect(horizontalHeader,
             &CustomHeaderView::fillFixed,
@@ -213,6 +234,16 @@ void MainWindow::initialiseTable()
             &MainWindow::handleDeleteNote);
 
     connect(verticalHeader,
+            &CustomHeaderView::selectNote,
+            this,
+            [this](const int& note)
+            {
+                const auto doAction{selectedNotes.end() == std::find(selectedNotes.begin(), selectedNotes.end(), note)};
+
+                selectNotes({note}, doAction);
+            });
+
+    connect(verticalHeader,
             &CustomHeaderView::fillSelection,
             this,
             &MainWindow::handleFillSelection);
@@ -221,6 +252,22 @@ void MainWindow::initialiseTable()
             &CustomHeaderView::clearSelection,
             this,
             &MainWindow::handleClearSelection);
+
+    connect(verticalHeader,
+            &CustomHeaderView::fixNote,
+            this,
+            [this](const int& note)
+            {
+                const auto fixedNotes{model->getFixedNotes()};
+                const auto doAction{fixedNotes.end() == std::find(fixedNotes.begin(), fixedNotes.end(), note)};
+
+                fixNotes({note}, doAction);
+            });
+
+    connect(verticalHeader,
+            &CustomHeaderView::fillFixed,
+            this,
+            &MainWindow::handleFixAll);
 
     connect(verticalHeader,
             &CustomHeaderView::clearFixed,
