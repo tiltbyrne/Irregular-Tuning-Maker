@@ -113,11 +113,10 @@ install(TARGETS IrregularTuningMaker
 if(UNIX AND NOT APPLE)
     install(FILES IrregularTuningMaker.desktop
         DESTINATION share/applications
-        RENAME uk.org.unionz.jamesbyrne.desktop
     )
-    install(FILES images/icon.png
+    install(FILES images/icon-small.png
         DESTINATION share/icons/hicolor/256x256/apps
-        RENAME uk.org.unionz.jamesbyrne.png
+        RENAME icon.png
     )
 endif()
 
