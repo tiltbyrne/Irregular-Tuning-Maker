@@ -1316,6 +1316,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
             if (keyEvent->matches(QKeySequence::Copy))
             {
                 QGuiApplication::clipboard()->setText(ldtqs(model->currentValue(idx.row(), idx.column())));
+
                 return true;
             }
             if (keyEvent->matches(QKeySequence::Paste))
@@ -1326,9 +1327,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                            idxColumn{ idx.column() };
 
                 auto rows{ text.split(QRegularExpression("\r?\n")) };
-
-                if (rows.size() > 0)
-                    rows.resize(rows.size() - 1);
 
                 for (auto row{ 0 }; row < rows.size(); ++row)
                 {

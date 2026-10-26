@@ -50,7 +50,6 @@ set(APP_SOURCES
     customspinbox.cpp
 )
 
-# A Windows .rc resource must not be passed to the macOS/Linux toolchain.
 if(WIN32)
     list(APPEND APP_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/app.rc")
 endif()
@@ -109,7 +108,6 @@ install(TARGETS IrregularTuningMaker
     LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
 )
 
-# These are Linux desktop-integration files, not macOS bundle contents.
 if(UNIX AND NOT APPLE)
     install(FILES IrregularTuningMaker.desktop
         DESTINATION share/applications
@@ -120,7 +118,6 @@ if(UNIX AND NOT APPLE)
     )
 endif()
 
-# Qt's deployment script copies the Qt frameworks/plugins needed by the app.
 if(WIN32 OR APPLE)
     qt_generate_deploy_app_script(
         TARGET IrregularTuningMaker
@@ -139,7 +136,7 @@ if(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
     set(CPACK_DMG_VOLUME_NAME "${CPACK_PACKAGE_NAME}")
 elseif(WIN32)
-    set(CPACK_GENERATOR "ZIP")   # or "NSIS" if you want an installer
+    set(CPACK_GENERATOR "ZIP")
 endif()
 
 include(CPack)
